@@ -11,14 +11,11 @@
 | Nama aplikasi | Spark – Spot My Park |
 | Judul project | Pengembangan Aplikasi Mobile Spark – Spot My Park untuk Pencatatan, Penelusuran, dan Pengingat Lokasi Parkir Kendaraan |
 | Mata kuliah | Pemrograman Perangkat Bergerak |
-| Platform | Mobile, dengan target awal Android |
-| Framework yang direncanakan | Flutter |
+| Platform | Android |
+| Framework yang direncanakan | Flutter (frontend-only) |
 | Bahasa pemrograman aplikasi | Dart |
-| Anggota kelompok | 103022400025 - Jeremy Marcelino
-103022400035 - Petra Panondang Simangunsong
-103022400043 - Ariz Taufani Aqilah
-103022400068 - Muhammad Dhaifullah Safarullah
-103022400070 - Muhammad Meizar Salman |
+| Data dan state | Dummy data awal di `lib/data/mock_data.dart`; perubahan runtime dikelola Provider/AppState |
+| Anggota kelompok | 103022400025 - Jeremy Marcelino<br>103022400035 - Petra Panondang Simangunsong<br>103022400043 - Ariz Taufani Aqilah<br>103022400068 - Muhammad Dhaifullah Safarullah<br>103022400070 - Muhammad Meizar Salman |
 | Kelas | SE 48 03 |
 | Status project | Perencanaan dan penyusunan PRD |
 | Status persetujuan dosen | Diterima setelah revisi |
@@ -38,6 +35,8 @@ Pada pencatatan bebas, pengguna dapat mencatat lokasi parkir tanpa memilih tempa
 Pengguna kemudian mengambil foto kendaraan atau area parkir menggunakan kamera perangkat. Aplikasi memperoleh koordinat GPS secara otomatis dan menampilkannya pada Google Maps agar pengguna dapat memeriksa serta menyesuaikan posisi pin sebelum menyimpan lokasi.
 
 Spark juga mendukung penyimpanan beberapa sesi parkir aktif, pengingat durasi parkir, dan riwayat parkir. Ketika pengguna telah menemukan serta mengambil kendaraannya, sesi dapat ditandai sebagai selesai. Sistem akan menyimpan waktu penyelesaian, membatalkan pengingat yang masih terjadwal, dan memindahkan sesi ke riwayat tanpa menghapus informasi parkir sebelumnya.
+
+Scope terbaru dari dosen membatasi implementasi pada Flutter frontend menggunakan dummy data, tanpa backend, REST API, atau layanan server aplikasi. Seluruh data awal pengguna, kota, mall berdasarkan kota, dan contoh sesi parkir berasal dari `lib/data/mock_data.dart`. Registrasi dan login merupakan simulasi lokal; perubahan pengguna dan sesi dikelola dalam memori oleh Provider/AppState selama aplikasi berjalan. Tidak ada persistent database atau jaminan data bertahan setelah restart aplikasi. Kamera, GPS, Google Maps, dan local notification tetap menggunakan kemampuan perangkat Android secara nyata; foto menggunakan file lokal perangkat.
 
 # 3. Latar Belakang
 
@@ -91,12 +90,12 @@ Penyelesaian masalah diperlukan untuk membantu pengguna mengakses kembali lokasi
 5. Memanfaatkan kamera perangkat untuk mengambil foto kendaraan atau lingkungan parkir sebagai referensi visual.
 6. Memanfaatkan GPS untuk memperoleh koordinat lokasi parkir secara otomatis.
 7. Menampilkan dan memungkinkan penyesuaian titik lokasi melalui Google Maps sebelum data disimpan.
-8. Menyimpan informasi sesi parkir menggunakan sistem berbasis server.
+8. Mensimulasikan penyimpanan informasi sesi parkir secara lokal melalui Provider/AppState selama aplikasi berjalan.
 9. Mendukung penyimpanan dan pengelolaan beberapa sesi parkir aktif dalam satu akun pengguna.
 10. Menyediakan detail lokasi dan riwayat parkir yang dapat diakses kembali.
 11. Menyediakan pengingat melalui notifikasi berdasarkan durasi yang dipilih pengguna.
 12. Mendukung penyelesaian sesi parkir dengan pencatatan waktu selesai dan pembatalan pengingat yang masih terjadwal.
-13. Menerapkan seluruh persyaratan minimal project akhir PPB.
+13. Menerapkan persyaratan project akhir PPB sesuai scope frontend-only; pengecualian server-based database dan API Integration perlu dipastikan dalam penilaian akhir.
 
 # 6. Target User
 
@@ -106,13 +105,13 @@ Penyelesaian masalah diperlukan untuk membantu pengguna mengakses kembali lokasi
 | Pengendara sepeda motor | Menyimpan informasi lokasi kendaraan di area parkir yang padat | Mengambil foto, menyimpan lokasi, melihat informasi parkir, mengatur pengingat, dan menyelesaikan sesi |
 | Pengguna dengan beberapa lokasi parkir aktif | Mengelola lebih dari satu catatan parkir secara bersamaan | Menambahkan beberapa sesi aktif, memilih detail setiap sesi, serta menyelesaikan sesi secara terpisah |
 
-Seluruh kategori target pengguna memiliki hak akses yang sama sebagai pengguna aplikasi. Setiap pengguna hanya dapat mengakses dan mengelola catatan parkir yang terhubung dengan akunnya.
+Seluruh kategori target pengguna memiliki hak akses yang sama sebagai pengguna aplikasi. AppState memfilter catatan berdasarkan akun simulasi yang sedang login; pemisahan ini merupakan perilaku UI lokal, bukan kontrol keamanan server.
 
 # 7. Proposed Solution
 
-Spark – Spot My Park menawarkan sistem pencatatan dan pengelolaan lokasi parkir kendaraan melalui aplikasi mobile dengan integrasi kamera, GPS, Google Maps, database server, dan notifikasi.
+Spark – Spot My Park menawarkan sistem pencatatan dan pengelolaan lokasi parkir kendaraan melalui Flutter frontend dengan integrasi kamera, GPS, Google Maps, shared state lokal, dan notifikasi.
 
-Pengguna membuat akun atau melakukan login untuk mengakses aplikasi. Setelah masuk, pengguna dapat melihat daftar sesi parkir aktif dan membuat catatan parkir baru.
+Pengguna membuat akun atau melakukan login melalui simulasi data lokal untuk mengakses aplikasi. Setelah masuk, pengguna dapat melihat daftar sesi parkir aktif dan membuat catatan parkir baru.
 
 Saat membuat catatan, pengguna terlebih dahulu memilih kota, kemudian menentukan salah satu metode pencatatan berikut:
 
@@ -123,7 +122,7 @@ Kedua metode menyediakan pilihan kode lantai atau area parkir seperti B1, B2, R1
 
 Setelah mengisi informasi lokasi, pengguna mengambil foto kendaraan atau area parkir. Aplikasi memperoleh koordinat GPS secara otomatis dan menampilkan posisi tersebut pada Google Maps. Pengguna dapat menggeser pin untuk menyesuaikan titik lokasi sebelum disimpan.
 
-Sistem menyimpan foto, koordinat, kota, informasi tempat, kode area apabila diisi, catatan, waktu pencatatan, dan status sesi parkir melalui server. Pengguna dapat menyimpan beberapa sesi parkir aktif secara bersamaan.
+AppState menyimpan referensi file foto lokal, koordinat, kota, informasi tempat, kode area apabila diisi, catatan, waktu pencatatan, dan status sesi parkir dalam memori. Pengguna dapat menyimpan beberapa sesi parkir aktif secara bersamaan selama aplikasi berjalan.
 
 Ketika ingin menemukan kendaraan, pengguna membuka detail sesi parkir untuk melihat foto, peta, nama tempat, serta informasi lantai atau zona parkir yang telah dicatat. Informasi tersebut digunakan sebagai petunjuk untuk menemukan kendaraan, terutama pada lokasi yang tidak dapat diidentifikasi secara presisi menggunakan GPS.
 
@@ -155,23 +154,23 @@ Prioritas menggunakan metode MoSCoW:
 
 | ID | Fitur | Kebutuhan |
 | --- | --- | --- |
-| FR-001 | Autentikasi pengguna | Pengguna dapat melakukan registrasi, login, dan logout untuk mengakses data parkir miliknya. |
+| FR-001 | Autentikasi pengguna (simulasi) | Pengguna dapat melakukan simulasi registrasi, login, dan logout menggunakan data lokal yang dikelola AppState. Ini bukan autentikasi aman terhadap server dan tidak menggunakan JWT. |
 | FR-002 | Pengambilan foto parkir | Pengguna dapat mengambil foto kendaraan atau area parkir menggunakan kamera perangkat. |
 | FR-003 | Pengambilan koordinat GPS | Sistem dapat memperoleh koordinat GPS secara otomatis saat pengguna mencatat lokasi parkir. |
 | FR-004 | Penyesuaian titik lokasi | Pengguna dapat melihat dan menggeser pin pada Google Maps sebelum menyimpan lokasi parkir. |
 | FR-005 | Pembuatan sesi parkir | Pengguna dapat menyimpan sesi parkir yang berisi foto, koordinat, informasi tempat, waktu pencatatan, dan status parkir. |
-| FR-006 | Penyimpanan foto parkir | Sistem dapat menyimpan foto parkir dan menampilkannya kembali saat dibutuhkan. |
-| FR-007 | Penyimpanan data parkir | Sistem dapat menyimpan dan mengambil kembali data parkir pengguna melalui server. |
+| FR-006 | Penyimpanan foto parkir | Sistem menggunakan file foto lokal perangkat dan menyimpan referensinya pada sesi di AppState untuk ditampilkan kembali selama runtime; tidak ada upload atau penyimpanan server. |
+| FR-007 | Penyimpanan data parkir | Sistem mensimulasikan penyimpanan dan pengambilan data parkir melalui Provider/AppState, dengan data awal dari `lib/data/mock_data.dart`. Data runtime tidak dijamin bertahan setelah restart aplikasi. |
 | FR-008 | Manajemen beberapa parkir aktif | Pengguna dapat menyimpan dan mengelola beberapa sesi parkir aktif secara bersamaan. |
 | FR-009 | Detail lokasi parkir | Pengguna dapat melihat foto, kota, tempat, area parkir, catatan, waktu, status, dan koordinat lokasi pada Google Maps. |
 | FR-010 | Penyelesaian sesi parkir | Pengguna dapat mengonfirmasi bahwa kendaraan telah ditemukan dan diambil untuk menyelesaikan sesi parkir, mencatat waktu selesai, dan membatalkan pengingat yang belum muncul. |
-| FR-011 | Riwayat parkir | Pengguna dapat melihat kembali daftar dan detail sesi parkir yang telah selesai tanpa kehilangan informasi sebelumnya. |
+| FR-011 | Riwayat parkir | Pengguna dapat melihat kembali daftar dan detail sesi parkir yang telah selesai tanpa kehilangan informasi sebelumnya selama aplikasi berjalan. |
 | FR-012 | Pengingat durasi parkir | Pengguna dapat menentukan durasi pengingat dan menerima notifikasi sesuai waktu yang ditentukan. |
 | FR-013 | Catatan lokasi parkir | Pengguna dapat menambahkan catatan seperti nomor pilar, pintu masuk, patokan lokasi, atau informasi tambahan lainnya. |
 | FR-018 | Pemilihan kota | Pengguna harus memilih kota saat membuat sesi parkir, baik melalui metode terstruktur maupun bebas. |
 | FR-019 | Metode pencatatan parkir | Pengguna dapat memilih metode pencatatan terstruktur atau bebas saat membuat sesi parkir. |
 | FR-020 | Pemilihan kategori tempat | Pengguna dapat memilih kategori Mall, Event, atau Lainnya pada metode pencatatan terstruktur. |
-| FR-021 | Daftar mall berdasarkan kota | Sistem dapat menampilkan daftar dummy mall berdasarkan kota yang dipilih pengguna. |
+| FR-021 | Daftar mall berdasarkan kota | Sistem dapat menampilkan daftar dummy mall berdasarkan kota yang dipilih pengguna dari sumber bersama `lib/data/mock_data.dart` melalui AppState. |
 | FR-022 | Pengisian nama tempat manual | Pengguna dapat memasukkan nama tempat secara manual untuk kategori Event, Lainnya, dan metode pencatatan bebas. |
 | FR-023 | Informasi lantai dan area parkir | Pengguna dapat menyimpan dan melihat kode lantai atau area parkir melalui dropdown B1, B2, R1, R2, atau opsi Lainnya dengan input manual. Pengisian bersifat opsional pada seluruh kategori dan metode pencatatan. |
 
@@ -200,33 +199,36 @@ Prioritas menggunakan metode MoSCoW:
 
 | Persyaratan pedoman | Rencana penerapan |
 | --- | --- |
-| Navigation dan Routing | Navigasi antara halaman login, beranda, tambah parkir, pengambilan foto, konfirmasi lokasi, detail parkir, riwayat, dan pengaturan |
-| Server-based Database | Data pengguna dan sesi parkir disimpan pada database MySQL di server; file foto disimpan melalui mekanisme penyimpanan server |
-| API Integration | Aplikasi Flutter bertukar data dengan backend Node.js/Express melalui REST API untuk autentikasi, pembuatan sesi, pengambilan data, dan perubahan status parkir |
-| File Storage | Aplikasi mengelola file foto yang diambil dari kamera, membaca file lokal, serta mengunggah foto untuk disimpan dan ditampilkan kembali |
+| Navigation dan Routing | Navigasi antara 8 halaman: Login, Register, Home, Add Parking, Capture Photo, Confirm Location, Parking Detail, dan Parking History |
+| Server-based Database | Belum diimplementasikan karena pembatasan scope terbaru dari dosen. Data awal menggunakan dummy data dan perubahan runtime menggunakan AppState, tanpa database persisten |
+| API Integration | Belum diimplementasikan karena pembatasan scope terbaru dari dosen. Tidak ada REST API/backend; penggunaan Google Maps tetap bagian integrasi perangkat dan tidak diklaim memenuhi persyaratan ini |
+| File Storage | Aplikasi mengelola dan membaca file foto lokal dari kamera serta menyimpan referensinya di AppState, tanpa upload |
 | Camera | Kamera digunakan untuk mengambil foto kendaraan atau area parkir saat pengguna membuat catatan baru |
-| State Management | Mengelola status autentikasi, proses pengambilan foto, lokasi GPS, daftar parkir aktif, riwayat, dan proses penyimpanan secara terstruktur |
-| Error Handling | Menangani kegagalan koneksi, data kosong, izin perangkat ditolak, lokasi tidak tersedia, input tidak valid, serta proses penyimpanan yang gagal |
-| Google Maps | Menampilkan koordinat GPS, memungkinkan pengguna menyesuaikan posisi pin, menyimpan koordinat ke server, dan menampilkan kembali lokasi parkir |
+| State Management | Provider/AppState mengelola pengguna simulasi, draft pencatatan, foto lokal, koordinat, sesi aktif, dan riwayat selama runtime |
+| Error Handling | Menangani peta gagal dimuat, data kosong, izin perangkat ditolak, lokasi tidak tersedia, input tidak valid, serta file foto lokal tidak dapat dibaca |
+| Google Maps | Menampilkan koordinat GPS, memungkinkan pengguna menyesuaikan posisi pin, menyimpan koordinat di AppState, dan menampilkan kembali lokasi parkir |
 | Notification | Menampilkan notifikasi lokal berdasarkan durasi pengingat yang ditentukan pengguna untuk setiap sesi parkir |
+
+Server-based Database dan API Integration belum terpenuhi. Pengecualian akibat scope terbaru ini masih perlu dipastikan dengan dosen dalam penilaian akhir; integrasi perangkat tidak menggantikan kedua persyaratan tersebut.
 
 # 10. Kebutuhan Nonfungsional (NFR)
 
 1. **Kemudahan penggunaan:** Tampilan dan navigasi aplikasi dibuat sederhana serta konsisten. Pengguna dapat menyimpan lokasi parkir melalui alur pengambilan foto, konfirmasi titik lokasi, dan penyimpanan tanpa langkah yang tidak diperlukan.
-2. **Keamanan akses:** Setiap pengguna hanya dapat mengakses dan mengubah data parkir yang terhubung dengan akunnya. Proses autentikasi dan pemeriksaan kepemilikan data dilakukan pada backend.
-3. **Privasi:** Foto kendaraan dan koordinat parkir diperlakukan sebagai informasi pribadi pengguna. Data hanya dapat diakses oleh pemilik akun yang berwenang dan tidak dibagikan kepada pengguna lain secara otomatis.
+2. **Simulasi akses:** AppState memfilter sesi berdasarkan pengguna lokal yang sedang login. Registrasi/login bukan autentikasi aman terhadap server dan tidak digunakan untuk akun atau kredensial nyata.
+3. **Privasi:** Foto kendaraan dan koordinat dikelola secara lokal dan tidak dibagikan kepada pengguna lain secara otomatis. Simulasi akun tidak menjamin perlindungan data seperti autentikasi server.
 4. **Konsistensi data:** Informasi foto, koordinat, waktu, dan status parkir harus memiliki hubungan yang sesuai dengan sesi yang dibuat. Perubahan status satu sesi tidak boleh memengaruhi sesi parkir lainnya.
 5. **Keakuratan informasi lokasi:** Koordinat lokasi diperoleh dari layanan lokasi perangkat. Karena akurasinya dapat dipengaruhi kondisi lingkungan, aplikasi memberikan kesempatan kepada pengguna untuk memeriksa dan menyesuaikan titik lokasi sebelum penyimpanan. Aplikasi tidak menjamin GPS dapat menunjukkan lantai atau slot parkir secara presisi.
 6. **Keandalan:** Aplikasi tidak berhenti mendadak ketika GPS, kamera, koneksi internet, atau proses penyimpanan mengalami kegagalan. Aplikasi memberikan informasi yang sesuai dan memungkinkan pengguna mencoba kembali.
 7. **Konsistensi notifikasi:** Pengingat dijadwalkan berdasarkan durasi yang dipilih pengguna. Notifikasi terjadwal untuk sesi yang telah diselesaikan harus dibatalkan jika belum ditampilkan, sejauh didukung mekanisme perangkat.
-8. **Kemudahan pemeliharaan:** Struktur kode dipisahkan menjadi presentation, domain, dan data layer serta menerapkan state management secara konsisten. Komponen UI yang memiliki kebutuhan serupa dibuat reusable.
+8. **Kemudahan pemeliharaan:** Halaman/widget, shared models, AppState, mock data, dan integrasi perangkat dipisahkan sesuai tanggung jawab. Semua halaman menggunakan kontrak data bersama dan komponen UI yang serupa dibuat reusable.
 9. **Efisiensi penyimpanan:** Foto dikelola dengan ukuran yang wajar untuk penggunaan aplikasi mobile. Mekanisme penyimpanan menghindari file sementara yang tidak diperlukan tanpa menghilangkan foto yang masih dibutuhkan pengguna.
+10. **Batas ketahanan data:** Pengguna baru, sesi aktif, dan riwayat yang berubah di AppState hanya tersedia selama runtime; restart menginisialisasi ulang data dummy dan tidak menjamin pemulihan perubahan sebelumnya.
 
 # 11. Alur Penggunaan
 
 **Alur Menyimpan Lokasi Parkir**
 
-1. Pengguna membuka aplikasi dan melakukan login.
+1. Pengguna membuka aplikasi dan melakukan simulasi login menggunakan data lokal.
 2. Memilih fitur tambah lokasi parkir.
 3. Memilih kota tempat kendaraan diparkir.
 4. Memilih metode pencatatan terstruktur atau bebas.
@@ -243,7 +245,7 @@ Prioritas menggunakan metode MoSCoW:
 12. Pengguna memeriksa titik lokasi pada Google Maps dan menggeser pin apabila diperlukan.
 13. Pengguna dapat menentukan durasi pengingat.
 14. Pengguna mengonfirmasi penyimpanan sesi parkir.
-15. Sistem menyimpan informasi parkir melalui server dan menampilkan sesi baru dalam daftar parkir aktif.
+15. AppState menyimpan informasi parkir beserta referensi file foto lokal dalam memori dan menampilkan sesi baru dalam daftar parkir aktif.
 16. Aplikasi menjadwalkan notifikasi apabila pengingat diaktifkan.
 
 **Alur Menemukan Kembali Lokasi Kendaraan**
@@ -262,29 +264,31 @@ Prioritas menggunakan metode MoSCoW:
 1. Pengguna membuka detail sesi parkir aktif.
 2. Memilih tindakan Selesai Parkir.
 3. Aplikasi menampilkan konfirmasi bahwa kendaraan telah ditemukan dan diambil.
-4. Setelah pengguna mengonfirmasi, sistem memperbarui status sesi menjadi selesai.
+4. Setelah pengguna mengonfirmasi, AppState memperbarui status sesi menjadi selesai.
 5. Sistem mencatat waktu penyelesaian parkir.
 6. Aplikasi membatalkan notifikasi pengingat yang belum ditampilkan.
-7. Sesi dihapus dari daftar parkir aktif dan tetap tersimpan pada riwayat parkir.
+7. Sesi dihapus dari daftar parkir aktif dan tetap tersimpan pada riwayat parkir di AppState selama runtime.
 8. Foto, koordinat, informasi tempat, lantai atau area, dan catatan tetap dapat diakses melalui riwayat.
 9. Sesi parkir aktif lainnya tidak terpengaruh.
 
 # 12. Rencana Teknologi dan Data
 
-Rencana teknologi tetap menggunakan Flutter, Dart, Node.js/Express, MySQL, REST API, Google Maps, kamera perangkat, GPS, local notification, dan GitHub.
+Rencana teknologi menggunakan Flutter dan Dart untuk Android, Provider/AppState, Google Maps, kamera perangkat, GPS, local notification, serta GitHub. Tidak ada backend Node.js/Express, MySQL, REST API, JWT, atau layanan server aplikasi.
+
+`lib/data/mock_data.dart` menjadi satu-satunya sumber dummy data awal pengguna, kota, mall berdasarkan kota, dan contoh sesi parkir. AppState menginisialisasi salinan data tersebut sekali, lalu mengelola perubahan runtime. Halaman tidak menduplikasi dummy data.
 
 **Data utama yang dikelola:**
 
-1. **Pengguna:** Identitas akun dan informasi autentikasi.
+1. **Pengguna:** Identitas akun dan kredensial dummy untuk simulasi login/register lokal.
 2. **Kota:** Identitas dan nama kota yang tersedia sebagai pilihan lokasi parkir.
 3. **Tempat:** Identitas tempat, nama, kategori, dan kota terkait. Daftar mall menggunakan dummy data yang dikelompokkan berdasarkan kota.
 4. **Sesi Parkir:** Identitas sesi, pemilik akun, metode pencatatan, kota, kategori dan nama tempat jika tersedia, koordinat, waktu pencatatan, status, dan waktu penyelesaian.
-5. **Foto Parkir:** Referensi file foto yang terhubung dengan sesi parkir.
+5. **Foto Parkir:** Referensi path file foto lokal perangkat yang terhubung dengan sesi parkir.
 6. **Detail Area Parkir:** Kode lantai atau area parkir yang dipilih dari dropdown maupun diisi secara manual.
 7. **Catatan Parkir:** Informasi tambahan mengenai lokasi kendaraan yang ditulis pengguna.
 8. **Pengingat Parkir:** Durasi pengingat dan waktu notifikasi yang terkait dengan sesi parkir.
 
-Data lokasi, area, catatan, foto, dan pengingat dapat disimpan sebagai atribut pada sesi parkir atau referensi file sesuai kebutuhan. Pemisahan tabel dilakukan jika diperlukan, tanpa menambah struktur yang tidak memiliki manfaat jelas.
+Shared models terdiri atas `User`, `City`, `Mall`, `ParkingSession`, dan `ParkingDraft`. Data lokasi, area, catatan, referensi foto, serta pengingat menjadi atribut model; draft menampung input sementara sebelum dikonfirmasi. Tidak ada tabel database atau penyimpanan persisten.
 
 **Hubungan data utama:**
 
@@ -300,20 +304,22 @@ Data lokasi, area, catatan, foto, dan pengingat dapat disimpan sebagai atribut p
 - Informasi lantai atau area parkir dan catatan tambahan bersifat opsional.
 - Satu pengguna dapat memiliki beberapa sesi parkir aktif secara bersamaan.
 - Setiap sesi memiliki status aktif atau selesai.
-- Sesi yang telah selesai tetap tersimpan sebagai riwayat parkir.
+- Sesi yang telah selesai tetap tersimpan sebagai riwayat parkir selama runtime.
 
 **Rencana mekanisme penyimpanan data:**
 
-1. Aplikasi mengambil daftar kota dan dummy data mall yang tersedia melalui backend.
+1. AppState menyediakan daftar kota dan mall dari data awal `lib/data/mock_data.dart`.
 2. Pengguna menentukan kota serta metode pencatatan.
 3. Sistem menampilkan daftar mall yang sesuai dengan kota apabila kategori Mall dipilih.
 4. Pengguna melengkapi informasi tempat, area parkir, dan catatan sesuai kebutuhan.
 5. Aplikasi mengambil foto dan koordinat GPS.
 6. Pengguna mengonfirmasi atau menyesuaikan titik lokasi pada Google Maps.
-7. Aplikasi mengirimkan foto dan metadata sesi parkir ke backend.
-8. Backend memvalidasi data dan menyimpan sesi parkir beserta referensi fotonya.
+7. Aplikasi meneruskan `ParkingDraft` yang telah dikonfirmasi ke `AppState.addParking()`.
+8. AppState memvalidasi data lokal dan menambahkan sesi parkir beserta referensi file fotonya ke shared state dalam memori.
 9. Aplikasi memperbarui daftar parkir aktif serta menjadwalkan pengingat jika diaktifkan.
-10. Ketika sesi diselesaikan, backend memperbarui status dan waktu selesai, sedangkan aplikasi membatalkan pengingat terkait.
+10. Ketika sesi diselesaikan, `AppState.completeParking()` memperbarui status dan waktu selesai serta aplikasi membatalkan pengingat terkait.
+
+Sesi aktif dan riwayat diakses melalui `activeSessions`, `parkingHistory`, serta `getParkingById()`. Data runtime tidak ditulis kembali ke `mock_data.dart` dan tidak dijamin bertahan setelah restart.
 
 # 13. Batasan Project
 
@@ -327,16 +333,17 @@ Data lokasi, area, catatan, foto, dan pengingat dapat disimpan sebagai atribut p
 8. Koordinat lokasi diperoleh menggunakan GPS perangkat dan dapat disesuaikan melalui Google Maps.
 9. Versi awal menggunakan satu foto utama untuk setiap sesi parkir.
 10. Pengguna dapat menyimpan beberapa sesi parkir aktif secara bersamaan.
-11. Penyimpanan dan pengambilan data utama membutuhkan koneksi internet.
+11. Data utama menggunakan dummy data dan shared state lokal tanpa koneksi server aplikasi. Google Maps tetap dapat memerlukan koneksi internet untuk memuat peta.
 12. Pengingat menggunakan local notification yang bergantung pada izin dan pengaturan perangkat.
 13. Sesi parkir diselesaikan melalui konfirmasi pengguna setelah kendaraan ditemukan dan diambil, bukan berdasarkan deteksi otomatis sistem.
-14. Sesi yang telah selesai tetap disimpan sebagai riwayat parkir.
+14. Sesi yang telah selesai tetap disimpan sebagai riwayat parkir selama aplikasi berjalan, tanpa jaminan persistensi setelah restart.
 15. Fitur pelacakan kendaraan real-time dan deteksi parkir otomatis tidak termasuk dalam cakupan pengembangan versi awal.
 16. Struktur kode, repository, jadwal pengerjaan, dan demonstrasi mengikuti ketentuan Project Akhir PPB.
+17. Registrasi/login hanya simulasi lokal; tidak ada backend, REST API, JWT, database persisten, atau upload foto. Pengecualian server-based database dan API Integration masih perlu dipastikan dalam penilaian akhir.
 
 # 14. Kriteria Keberhasilan
 
-1. Pengguna dapat membuat akun, login, logout, dan mengakses data parkir miliknya.
+1. Pengguna dapat melakukan simulasi membuat akun, login, logout, dan melihat sesi yang difilter berdasarkan akun lokal selama runtime.
 2. Pengguna dapat memilih kota pada saat membuat sesi parkir.
 3. Pengguna dapat memilih metode pencatatan terstruktur atau bebas.
 4. Pada metode terstruktur, pengguna dapat memilih kategori Mall, Event, atau Lainnya.
@@ -348,7 +355,7 @@ Data lokasi, area, catatan, foto, dan pengingat dapat disimpan sebagai atribut p
 10. Aplikasi berhasil memperoleh koordinat GPS dan menampilkannya pada Google Maps.
 11. Pengguna dapat menggeser pin untuk menyesuaikan titik lokasi sebelum disimpan.
 12. Sistem berhasil menyimpan foto, koordinat, kota, informasi tempat, area, catatan, dan waktu pencatatan sesuai data yang diisi pengguna.
-13. Data parkir berhasil tersimpan pada server dan dapat ditampilkan kembali melalui akun pengguna.
+13. Data parkir berhasil dikelola di AppState dan dapat ditampilkan kembali selama runtime, dengan data awal dari `lib/data/mock_data.dart` serta tanpa jaminan persistensi setelah restart.
 14. Pengguna dapat menyimpan lebih dari satu sesi parkir aktif secara bersamaan.
 15. Detail sesi menampilkan informasi yang sebelumnya disimpan, termasuk lantai atau area parkir sebagai petunjuk ketika kendaraan berada di gedung bertingkat.
 16. Pengguna dapat menentukan durasi pengingat dan menerima notifikasi ketika izin serta pengaturan perangkat mendukung.
@@ -357,9 +364,9 @@ Data lokasi, area, catatan, foto, dan pengingat dapat disimpan sebagai atribut p
 19. Pengingat yang belum muncul berhasil dibatalkan ketika sesi parkir terkait diselesaikan.
 20. Sesi yang selesai tidak lagi muncul pada daftar aktif, tetapi tetap dapat diakses melalui riwayat.
 21. Penyelesaian satu sesi tidak memengaruhi sesi parkir aktif lainnya.
-22. Sistem dapat menangani kondisi kegagalan koneksi, izin perangkat ditolak, GPS tidak tersedia, dan penyimpanan gagal tanpa menyebabkan aplikasi berhenti mendadak.
-23. Seluruh sembilan persyaratan minimal PPB dapat didemonstrasikan melalui aplikasi.
-24. Struktur kode menerapkan clean architecture, state management, dan reusable component secara konsisten.
+22. Sistem dapat menangani peta gagal dimuat, izin perangkat ditolak, GPS tidak tersedia, input tidak valid, dan file foto lokal tidak tersedia tanpa menyebabkan aplikasi berhenti mendadak.
+23. Persyaratan PPB dalam scope dapat didemonstrasikan; server-based database dan API Integration belum diimplementasikan, dengan pengecualian yang perlu dipastikan dalam penilaian akhir.
+24. Halaman menggunakan shared models, Provider/AppState, satu sumber dummy data, dan reusable component secara konsisten.
 
 # 15. Progress Pengembangan
 
@@ -369,12 +376,12 @@ Bagian ini digunakan untuk memantau perkembangan implementasi fitur dan wajib di
 
 | Komponen | Status |
 | --- | --- |
-| Penyusunan PRD | Revisi berdasarkan catatan dosen |
+| Penyusunan PRD | Direvisi untuk scope Flutter frontend-only dan dummy data |
 | Persetujuan judul | Diterima dengan catatan revisi |
 | Perancangan UI/UX | Belum dikerjakan |
-| Perancangan arsitektur | Belum dikerjakan |
+| Perancangan arsitektur | Baseline frontend-only didokumentasikan pada `TECH_SPEC.md`; foundation belum diimplementasikan |
 | Pengembangan aplikasi | Belum dikerjakan |
-| Integrasi backend | Belum dikerjakan |
+| Integrasi backend / REST API | Tidak diimplementasikan sesuai scope terbaru dari dosen |
 | Pengujian aplikasi | Belum dikerjakan |
 | Dokumentasi akhir | Belum dikerjakan |
 
@@ -382,7 +389,7 @@ Bagian ini digunakan untuk memantau perkembangan implementasi fitur dan wajib di
 
 | ID | Fitur | Prioritas | Status |
 | --- | --- | --- | --- |
-| FR-001 | Autentikasi pengguna | Must Have | Belum dikerjakan |
+| FR-001 | Autentikasi pengguna (simulasi) | Must Have | Belum dikerjakan |
 | FR-002 | Pengambilan foto parkir | Must Have | Belum dikerjakan |
 | FR-003 | Pengambilan koordinat GPS | Must Have | Belum dikerjakan |
 | FR-004 | Penyesuaian titik lokasi | Must Have | Belum dikerjakan |
@@ -414,15 +421,19 @@ Bagian ini digunakan untuk memantau perkembangan implementasi fitur dan wajib di
 4. Pemilihan area parkir harus mendukung kode standar, input manual, dan kondisi tanpa area.
 5. Proses penyelesaian sesi perlu menjaga konsistensi riwayat dan pembatalan pengingat.
 6. Pengelolaan beberapa sesi aktif harus memastikan perubahan satu sesi tidak memengaruhi sesi lainnya.
+7. Pengecualian persyaratan server-based database dan API Integration akibat pembatasan scope masih perlu dipastikan dalam penilaian akhir.
+8. Perubahan akun dan sesi runtime dapat hilang setelah restart; simulasi login bukan autentikasi aman.
 
 **Rencana Penyelesaian Kendala**
 
 1. Menyelaraskan PRD dengan seluruh catatan revisi dosen.
 2. Menggunakan informasi lantai, zona, dan catatan sebagai petunjuk tambahan selain koordinat GPS.
-3. Menyiapkan data kota dan daftar mall sebagai data referensi awal.
+3. Menyiapkan seluruh dummy data awal pengguna, kota, mall, dan contoh sesi dalam `lib/data/mock_data.dart`, lalu mengelola perubahan runtime melalui AppState.
 4. Menyediakan dropdown kode area dengan opsi Lainnya serta mendukung pengisian kosong.
 5. Menggunakan konfirmasi pengguna untuk mengakhiri sesi, menyimpan waktu selesai, dan membatalkan pengingat.
 6. Menggunakan identitas unik untuk setiap sesi parkir.
+7. Memastikan penerimaan pengecualian scope dengan dosen sebelum penilaian akhir.
+8. Menjelaskan batas simulasi dan ketahanan data pada dokumentasi serta demonstrasi.
 
 **Ketentuan Pembaruan Progress**
 
