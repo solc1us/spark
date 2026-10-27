@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'pages/add_parking_page.dart';
 import 'pages/capture_photo_page.dart';
@@ -9,9 +10,12 @@ import 'pages/parking_detail_page.dart';
 import 'pages/parking_history_page.dart';
 import 'pages/register_page.dart';
 import 'routes/app_routes.dart';
+import 'state/app_state.dart';
 
 void main() {
-  runApp(const SparkApp());
+  runApp(
+    ChangeNotifierProvider(create: (_) => AppState(), child: const SparkApp()),
+  );
 }
 
 class SparkApp extends StatelessWidget {
