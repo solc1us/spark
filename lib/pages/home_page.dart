@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.indigo.withOpacity(0.25),
+                    color: Colors.indigo.withValues(alpha: 0.25),
                     spreadRadius: 1,
                     blurRadius: 6,
                     offset: const Offset(0, 3),
