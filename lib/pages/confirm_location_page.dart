@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
@@ -5,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../routes/app_routes.dart';
 import '../state/app_state.dart';
 
 class ConfirmLocationPage extends StatefulWidget {
@@ -16,6 +19,7 @@ class ConfirmLocationPage extends StatefulWidget {
 
 class _ConfirmLocationPageState extends State<ConfirmLocationPage> {
   bool _isLoading = true;
+  bool _isSaving = false;
   double? _latitude;
   double? _longitude;
   String? _errorMessage;
@@ -84,10 +88,76 @@ class _ConfirmLocationPageState extends State<ConfirmLocationPage> {
     });
   }
 
+  void _saveParking() {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+
+    String? saveError;
+    try {
+      final appState = context.read<AppState>();
+      final draft = appState.parkingDraft;
+      if (draft == null) {
+        throw StateError('Data parkir belum tersedia. Isi form parkir dahulu.');
+      }
+      if (_isLoading ||
+          _errorMessage != null ||
+          _latitude == null ||
+          _longitude == null) {
+        throw StateError(
+          'Lokasi belum tersedia. Ambil lokasi terlebih dahulu.',
+        );
+      }
+      final photoPath = draft.photoPath?.trim();
+      if (photoPath == null ||
+          photoPath.isEmpty ||
+          !File(photoPath).existsSync()) {
+        throw ArgumentError('Foto tidak tersedia. Silakan ambil foto ulang.');
+      }
+
+      draft.latitude = _latitude;
+      draft.longitude = _longitude;
+      appState.addParking(draft);
+    } on ArgumentError catch (error) {
+      saveError = error.message.toString();
+    } on StateError catch (error) {
+      saveError = error.message;
+    } catch (_) {
+      saveError = 'Gagal menyimpan parkir. Silakan coba lagi.';
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(content: Text(saveError ?? 'Parkir berhasil disimpan.')),
+    );
+    if (saveError != null) {
+      setState(() => _isSaving = false);
+      return;
+    }
+
+    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (_) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Konfirmasi Lokasi')),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: ElevatedButton(
+            onPressed:
+                !_isLoading &&
+                    !_isSaving &&
+                    _errorMessage == null &&
+                    _latitude != null &&
+                    _longitude != null
+                ? _saveParking
+                : null,
+            child: const Text('Simpan Parkir'),
+          ),
+        ),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
