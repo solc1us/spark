@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_dragmarker/flutter_map_dragmarker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../state/app_state.dart';
@@ -91,7 +94,7 @@ class _ConfirmLocationPageState extends State<ConfirmLocationPage> {
           child: _isLoading
               ? const CircularProgressIndicator()
               : Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (_errorMessage != null) ...[
                       Text(_errorMessage!, textAlign: TextAlign.center),
@@ -101,6 +104,63 @@ class _ConfirmLocationPageState extends State<ConfirmLocationPage> {
                         child: const Text('Coba Lagi'),
                       ),
                     ] else ...[
+                      Expanded(
+                        child: FlutterMap(
+                          options: MapOptions(
+                            initialCenter: LatLng(_latitude!, _longitude!),
+                            initialZoom: 18,
+                            maxZoom: 19,
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.example.spark',
+                            ),
+                            DragMarkers(
+                              markers: [
+                                DragMarker(
+                                  point: LatLng(_latitude!, _longitude!),
+                                  size: const Size(48, 48),
+                                  alignment: Alignment.topCenter,
+                                  builder: (context, point, isDragging) =>
+                                      const Icon(
+                                        Icons.location_on,
+                                        size: 48,
+                                        color: Colors.red,
+                                        semanticLabel: 'Lokasi parkir',
+                                      ),
+                                  onDragUpdate: (details, point) {
+                                    setState(() {
+                                      _latitude = point.latitude;
+                                      _longitude = point.longitude;
+                                    });
+                                    final appState = context.read<AppState>();
+                                    final draft = appState.parkingDraft;
+                                    if (draft != null) {
+                                      draft.latitude = point.latitude;
+                                      draft.longitude = point.longitude;
+                                      appState.updateParkingDraft(draft);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            const SimpleAttributionWidget(
+                              source: Text(
+                                'OpenStreetMap contributors\n'
+                                'openstreetmap.org/copyright',
+                                style: TextStyle(fontSize: 11),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Geser pin untuk menyesuaikan lokasi parkir.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
                       Text('Latitude: $_latitude'),
                       const SizedBox(height: 8),
                       Text('Longitude: $_longitude'),
