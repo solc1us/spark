@@ -82,14 +82,28 @@ class ParkingDetailPage extends StatelessWidget {
             TextButton.icon(
               onPressed: () async {
                 final allowed = await NotificationService.requestPermission();
-                if (!context.mounted) return;
 
+                if (!allowed) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Izin notifikasi tidak diberikan.'),
+                    ),
+                  );
+                  return;
+                }
+
+                final scheduled = await NotificationService.scheduleReminder(
+                  session,
+                );
+
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      allowed == true
-                          ? 'Izin notifikasi diberikan.'
-                          : 'Izin notifikasi tidak diberikan.',
+                      scheduled
+                          ? 'Pengingat berhasil dijadwalkan.'
+                          : 'Waktu pengingat sesi ini sudah lewat.',
                     ),
                   ),
                 );
@@ -177,6 +191,26 @@ class ParkingDetailPage extends StatelessWidget {
 
                       if (confirm == true && context.mounted) {
                         context.read<AppState>().completeParking(session.id);
+
+                        var reminderCancelled = true;
+                        if (session.reminderMinutes != null) {
+                          reminderCancelled =
+                              await NotificationService.cancelReminder(
+                                session.id,
+                              );
+                        }
+
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              reminderCancelled
+                                  ? 'Parkir selesai.'
+                                  : 'Parkir selesai, tetapi pengingat belum berhasil dibatalkan.',
+                            ),
+                          ),
+                        );
                       }
                     },
                     child: const Text(
