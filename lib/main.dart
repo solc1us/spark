@@ -11,8 +11,11 @@ import 'pages/parking_history_page.dart';
 import 'pages/register_page.dart';
 import 'routes/app_routes.dart';
 import 'state/app_state.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initialize();
   runApp(
     ChangeNotifierProvider(create: (_) => AppState(), child: const SparkApp()),
   );
