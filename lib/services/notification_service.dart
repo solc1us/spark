@@ -60,4 +60,13 @@ class NotificationService {
 
     return true;
   }
+
+  static Future<bool> cancelReminder(String sessionId) async {
+    try {
+      await _plugin.cancel(id: sessionId.hashCode);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 }

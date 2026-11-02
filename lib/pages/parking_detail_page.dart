@@ -191,6 +191,26 @@ class ParkingDetailPage extends StatelessWidget {
 
                       if (confirm == true && context.mounted) {
                         context.read<AppState>().completeParking(session.id);
+
+                        var reminderCancelled = true;
+                        if (session.reminderMinutes != null) {
+                          reminderCancelled =
+                              await NotificationService.cancelReminder(
+                                session.id,
+                              );
+                        }
+
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              reminderCancelled
+                                  ? 'Parkir selesai.'
+                                  : 'Parkir selesai, tetapi pengingat belum berhasil dibatalkan.',
+                            ),
+                          ),
+                        );
                       }
                     },
                     child: const Text(
