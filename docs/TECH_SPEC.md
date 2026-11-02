@@ -20,7 +20,7 @@ Implementasi difokuskan pada fitur Must Have:
 - Pencatatan lokasi parkir terstruktur dan bebas.
 - Pemilihan kota dan dummy data mall.
 - Pengambilan foto dan GPS.
-- Penyesuaian pin Google Maps.
+- Penyesuaian pin Maps.
 - Simulasi penyimpanan sesi parkir melalui shared state lokal.
 - Pengelolaan beberapa sesi aktif.
 - Detail dan riwayat parkir.
@@ -30,9 +30,9 @@ Implementasi difokuskan pada fitur Must Have:
 
 Fitur Should Have dan Could Have tetap mengikuti prioritas PRD dan dikerjakan setelah seluruh fitur Must Have selesai. ID FR tidak berubah.
 
-Kamera, GPS, Google Maps, dan local notifications menggunakan kemampuan perangkat Android secara nyata. Foto berupa file lokal perangkat. Registrasi/login bukan autentikasi aman terhadap server; data runtime tidak dijamin bertahan setelah restart.
+Kamera, GPS, Maps, dan local notifications menggunakan kemampuan perangkat Android secara nyata. Foto berupa file lokal perangkat. Registrasi/login bukan autentikasi aman terhadap server; data runtime tidak dijamin bertahan setelah restart.
 
-Server-based Database dan API Integration belum diimplementasikan karena pembatasan scope terbaru. Pengecualian kedua persyaratan PPB tersebut masih perlu dipastikan dengan dosen dalam penilaian akhir. Penggunaan Google Maps tidak diklaim memenuhi persyaratan API Integration tersebut.
+Server-based Database dan API Integration belum diimplementasikan karena pembatasan scope terbaru. Pengecualian kedua persyaratan PPB tersebut masih perlu dipastikan dengan dosen dalam penilaian akhir. Penggunaan Maps tidak diklaim memenuhi persyaratan API Integration tersebut.
 
 ## 2. System Architecture
 
@@ -42,7 +42,7 @@ Spark menggunakan shared state lokal di dalam aplikasi Flutter.
 - **Shared Models:** User, City, Mall, ParkingSession, dan ParkingDraft.
 - **Initial Data:** Satu file bersama, `lib/data/mock_data.dart`, untuk dummy user, kota, mall berdasarkan kota, serta contoh sesi parkir.
 - **AppState:** Provider mengelola pengguna lokal, sesi aktif, riwayat, dan draft selama runtime.
-- **Device Integration:** Kamera, GPS, Google Maps, file foto lokal, serta penjadwalan/pembatalan notifikasi lokal.
+- **Device Integration:** Kamera, GPS, Maps, file foto lokal, serta penjadwalan/pembatalan notifikasi lokal.
 
 Alur data:
 
@@ -64,14 +64,16 @@ Alur data:
 | Initial Data | `lib/data/mock_data.dart` |
 | Runtime Data | Shared models dan koleksi dalam memori AppState |
 | Login / Register | Simulasi lokal dengan kredensial dummy |
-| Maps | Google Maps Flutter |
+| Maps | `flutter_map` dengan tile OpenStreetMap |
+| Coordinates | `latlong2` |
+| Draggable Pin | `flutter_map_dragmarker`, kompatibel dengan versi `flutter_map` yang digunakan |
 | Location | GPS / Location Services perangkat |
 | Camera | Flutter Camera Plugin |
 | Photo Storage | File lokal perangkat; path disimpan pada model sesi |
 | Notifications | Android Local Notifications |
 | Version Control | Git / GitHub |
 
-Gunakan dependency yang sudah disepakati untuk kebutuhan tersebut; dokumen ini tidak menambah dependency atau HTTP client. Google Maps tetap dapat memerlukan koneksi internet untuk memuat peta.
+Gunakan dependency yang sudah disepakati untuk kebutuhan tersebut, tanpa HTTP client tambahan. OpenStreetMap memerlukan koneksi internet untuk memuat tile peta. Baseline peta yang kompatibel: `flutter_map 8.3.2`, `flutter_map_dragmarker 8.0.3`, dan `latlong2 0.9.1`.
 
 ## 4. Application Architecture
 
@@ -83,7 +85,7 @@ Pemisahan tanggung jawab dilakukan secara sederhana mengikuti struktur dan konve
 - **Shared Models:** Kontrak data bersama untuk semua halaman.
 - **AppState:** Operasi pengguna simulasi, draft, dan pengelolaan sesi melalui Provider.
 - **Data:** `lib/data/mock_data.dart` sebagai satu sumber dummy data awal.
-- **Device Integration:** Camera, GPS, Google Maps, foto lokal, dan notifications.
+- **Device Integration:** Camera, GPS, Maps, foto lokal, dan notifications.
 
 Tidak diperlukan repository/API layer, DTO server, atau use-case class untuk setiap operasi sederhana.
 
@@ -96,7 +98,7 @@ Tidak diperlukan repository/API layer, DTO server, atau use-case class untuk set
 | Home | Menampilkan `activeSessions` dan akses tambah/detail/riwayat |
 | Add Parking | Mengisi kota, metode, tempat, area, catatan, dan durasi pengingat pada draft |
 | Capture Photo | Mengambil foto perangkat dan mengisi path foto pada draft |
-| Confirm Location | Mengambil GPS, menyesuaikan pin Google Maps, dan mengonfirmasi penyimpanan draft |
+| Confirm Location | Mengambil GPS, menyesuaikan pin Maps, dan mengonfirmasi penyimpanan draft |
 | Parking Detail | Menampilkan sesi berdasarkan ID dan opsi selesai untuk sesi aktif |
 | Parking History | Menampilkan `parkingHistory` dan akses detail sesi selesai |
 
@@ -226,10 +228,11 @@ Sediakan operasi memulai, memperbarui, dan membersihkan parkingDraft melalui App
 - Jika kota berubah, pilihan mall sebelumnya harus direset.
 - Perbedaan koordinat GPS dan kota yang dipilih tidak membutuhkan validasi geografis otomatis pada versi awal.
 
-### 7.2. GPS & Google Maps
+### 7.2. GPS & Maps
 
 - GPS diambil ketika membuat sesi parkir.
-- Aplikasi menampilkan koordinat awal pada Google Maps.
+- Aplikasi menampilkan koordinat GPS awal pada Maps menggunakan `flutter_map` dengan OpenStreetMap dan `latlong2`.
+- `flutter_map_dragmarker` digunakan untuk penyesuaian pin sesuai baseline dependency yang kompatibel.
 - Pengguna dapat memindahkan pin sebelum menyimpan.
 - Koordinat yang disimpan di AppState merupakan posisi pin terakhir yang dikonfirmasi.
 - Jika GPS tidak tersedia atau izin ditolak, aplikasi menampilkan error dan opsi mencoba kembali.
@@ -340,7 +343,6 @@ Gunakan loading, success, empty, dan error state untuk operasi perangkat asinkro
 - Gunakan data demo, bukan kredensial nyata, dan jangan mencatat password ke log.
 - Filter userId dilakukan AppState untuk konsistensi tampilan dan mutasi lokal.
 - Foto dibaca dari file lokal; path foto bukan URL upload atau penyimpanan server.
-- Google Maps API key dibatasi penggunaannya sesuai konfigurasi aplikasi Android.
 - File konfigurasi rahasia tidak dimasukkan ke repository.
 - Izin kamera, lokasi, dan notifikasi diminta serta ditangani sesuai kebutuhan alur pengguna.
 
@@ -369,7 +371,7 @@ Implementasi dilakukan secara bertahap. Roadmap ini merupakan acuan pekerjaan; r
 ### Phase 2 — Device Integration dan Interaksi
 
 - Hubungkan kamera nyata dan preview file foto lokal.
-- Hubungkan GPS, Google Maps, draggable pin, serta konfirmasi koordinat.
+- Hubungkan GPS, Maps, draggable pin, serta konfirmasi koordinat.
 - Hubungkan form terstruktur/bebas, penyimpanan draft, dan penyelesaian sesi.
 - Jadwalkan/batalkan local notifications dan tangani izin serta kegagalan perangkat.
 
@@ -435,7 +437,7 @@ Keputusan baseline:
 - Shared models User, City, Mall, ParkingSession, serta ParkingDraft sebagai kontrak lintas halaman.
 - Seluruh dummy data awal berasal dari `lib/data/mock_data.dart`; tidak diduplikasi pada halaman.
 - Login/register lokal tanpa autentikasi server; tidak ada backend, REST API, JWT, atau database persisten.
-- Foto lokal serta integrasi nyata kamera, GPS, Google Maps, dan local notifications.
+- Foto lokal serta integrasi nyata kamera, GPS, Maps, dan local notifications.
 - Seluruh Must Have, dua metode pencatatan, ID FR, serta prioritas MoSCoW tetap mengacu pada PRD.
 - Tidak ada jaminan persistensi setelah restart.
 - Pengecualian PPB untuk server-based database dan API Integration masih perlu dipastikan dalam penilaian akhir.
