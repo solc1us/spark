@@ -82,14 +82,28 @@ class ParkingDetailPage extends StatelessWidget {
             TextButton.icon(
               onPressed: () async {
                 final allowed = await NotificationService.requestPermission();
-                if (!context.mounted) return;
 
+                if (!allowed) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Izin notifikasi tidak diberikan.'),
+                    ),
+                  );
+                  return;
+                }
+
+                final scheduled = await NotificationService.scheduleReminder(
+                  session,
+                );
+
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      allowed == true
-                          ? 'Izin notifikasi diberikan.'
-                          : 'Izin notifikasi tidak diberikan.',
+                      scheduled
+                          ? 'Pengingat berhasil dijadwalkan.'
+                          : 'Waktu pengingat sesi ini sudah lewat.',
                     ),
                   ),
                 );
