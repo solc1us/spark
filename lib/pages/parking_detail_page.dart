@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../services/notification_service.dart';
 import '../state/app_state.dart';
 
 class ParkingDetailPage extends StatelessWidget {
@@ -24,7 +25,7 @@ class ParkingDetailPage extends StatelessWidget {
               .firstWhere((mall) => mall.id == session.mallId)
               .name;
 
-    Widget _detailRow(String label, String value) {
+    Widget detailpage(String label, String value) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 15),
         child: Row(
@@ -46,7 +47,7 @@ class ParkingDetailPage extends StatelessWidget {
       );
     }
 
-    String _formatDate(DateTime date) {
+    String formatDate(DateTime date) {
       final localDate = date.toLocal();
       const months = [
         'Jan',
@@ -74,6 +75,29 @@ class ParkingDetailPage extends StatelessWidget {
           'Detail Parkir',
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          if (session != null &&
+              session.reminderMinutes != null &&
+              session.status == 'active')
+            TextButton.icon(
+              onPressed: () async {
+                final allowed = await NotificationService.requestPermission();
+                if (!context.mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      allowed == true
+                          ? 'Izin notifikasi diberikan.'
+                          : 'Izin notifikasi tidak diberikan.',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.notifications_active_outlined),
+              label: const Text('Izinkan'),
+            ),
+        ],
       ),
       body: session == null
           ? const Center(child: Text('Sesi parkir tidak ditemukan.'))
@@ -113,24 +137,21 @@ class ParkingDetailPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                _detailRow('Kota', cityName!),
+                detailpage('Kota', cityName!),
                 if (session.areaCode != null)
-                  _detailRow('Area', session.areaCode!),
+                  detailpage('Area', session.areaCode!),
                 if (session.notes != null)
-                  _detailRow('Catatan', session.notes!),
-                _detailRow('Waktu parkir', _formatDate(session.createdAt)),
-                _detailRow(
+                  detailpage('Catatan', session.notes!),
+                detailpage('Waktu parkir', formatDate(session.createdAt)),
+                detailpage(
                   'Koordinat',
                   '${session.latitude}, ${session.longitude}',
                 ),
                 if (session.reminderMinutes != null)
-                  _detailRow('Pengingat', '${session.reminderMinutes} menit'),
-                _detailRow('Status', session.status),
+                  detailpage('Pengingat', '${session.reminderMinutes} menit'),
+                detailpage('Status', session.status),
                 if (session.completedAt != null)
-                  _detailRow(
-                    'Waktu selesai',
-                    _formatDate(session.completedAt!),
-                  ),
+                  detailpage('Waktu selesai', formatDate(session.completedAt!)),
                 if (session.status == 'active')
                   ElevatedButton(
                     onPressed: () async {
