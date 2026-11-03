@@ -17,9 +17,39 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _hidePassword = true;
   bool _hideConfirmPassword = true;
 
+  String nameError = '';
+  String emailError = '';
+
   final Color orange = const Color(0xFFEA580C);
   final Color dark = const Color(0xFF172033);
   final Color grey = const Color(0xFF64748B);
+
+  bool validateName() {
+    String name = _nameController.text;
+
+    if (name == '') {
+      nameError = 'Nama lengkap wajib diisi';
+      return false;
+    } else {
+      nameError = '';
+      return true;
+    }
+  }
+
+  bool validateEmail() {
+    String email = _emailController.text;
+
+    if (email == '') {
+      emailError = 'Email wajib diisi';
+      return false;
+    } else if (!email.contains('@') || !email.contains('.')) {
+      emailError = 'Format email tidak valid';
+      return false;
+    } else {
+      emailError = '';
+      return true;
+    }
+  }
 
   @override
   void dispose() {
@@ -61,9 +91,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 440,
-              ),
+              constraints: const BoxConstraints(maxWidth: 440),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -151,6 +179,18 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
 
+                        if (nameError != '')
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              nameError,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+
                         const SizedBox(height: 20),
 
                         Text(
@@ -171,6 +211,18 @@ class _RegisterPageState extends State<RegisterPage> {
                             Icons.email_outlined,
                           ),
                         ),
+
+                        if (emailError != '')
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              emailError,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
 
                         const SizedBox(height: 20),
 
@@ -246,13 +298,20 @@ class _RegisterPageState extends State<RegisterPage> {
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Fitur pendaftaran belum diimplementasikan.',
+                              bool nameValid = validateName();
+                              bool emailValid = validateEmail();
+
+                              setState(() {});
+
+                              if (nameValid && emailValid) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Fitur pendaftaran belum diimplementasikan.',
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: orange,
