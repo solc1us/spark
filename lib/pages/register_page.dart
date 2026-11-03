@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../state/app_state.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -73,6 +76,35 @@ class _RegisterPageState extends State<RegisterPage> {
     } else {
       confirmPasswordError = '';
       return true;
+    }
+  }
+
+  void _register() {
+    bool nameValid = validateName();
+    bool emailValid = validateEmail();
+    bool passwordValid = validatePassword();
+    bool confirmPasswordValid = validateConfirmPassword();
+
+    setState(() {});
+
+    if (nameValid && emailValid && passwordValid && confirmPasswordValid) {
+      bool success = context.read<AppState>().register(
+        _nameController.text,
+        _emailController.text,
+        _passwordController.text,
+      );
+
+      if (success) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Pendaftaran berhasil.')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pendaftaran gagal. Periksa data akun.'),
+          ),
+        );
+      }
     }
   }
 
@@ -330,28 +362,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {
-                            bool nameValid = validateName();
-                            bool emailValid = validateEmail();
-                            bool passwordValid = validatePassword();
-                            bool confirmPasswordValid =
-                                validateConfirmPassword();
-
-                            setState(() {});
-
-                            if (nameValid &&
-                                emailValid &&
-                                passwordValid &&
-                                confirmPasswordValid) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Fitur pendaftaran belum diimplementasikan.',
-                                  ),
-                                ),
-                              );
-                            }
-                          },
+                          onPressed: _register,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFEA580C),
                             foregroundColor: Colors.white,
