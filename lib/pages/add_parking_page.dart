@@ -16,10 +16,10 @@ class AddParkingPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Add Parking')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: ListView(
           children: [
             DropdownButtonFormField<String>(
-              value: draft?.cityId,
+              initialValue: draft?.cityId,
               decoration: const InputDecoration(labelText: 'Kota'),
               items: [
                 for (final city in appState.cities)
@@ -39,7 +39,7 @@ class AddParkingPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: draft?.mode,
+              initialValue: draft?.mode,
               decoration: const InputDecoration(
                 labelText: 'Metode pencatatan',
               ),
@@ -65,6 +65,52 @@ class AddParkingPage extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
+            if (draft?.mode == 'structured') ...[
+              DropdownButtonFormField<String>(
+                initialValue: draft?.category,
+                decoration: const InputDecoration(labelText: 'Kategori tempat'),
+                items: const [
+                  DropdownMenuItem(value: 'mall', child: Text('Mall')),
+                  DropdownMenuItem(value: 'event', child: Text('Event')),
+                  DropdownMenuItem(value: 'other', child: Text('Lainnya')),
+                ],
+                onChanged: (category) {
+                  final updatedDraft = draft ?? ParkingDraft();
+                  if (updatedDraft.category != category) {
+                    updatedDraft.category = category;
+                    updatedDraft.mallId = null;
+                    updatedDraft.placeName = null;
+                    appState.updateParkingDraft(updatedDraft);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (draft?.mode == 'structured' && draft?.category == 'mall') ...[
+              DropdownButtonFormField<String>(
+                key: ValueKey(draft?.cityId),
+                initialValue: draft?.mallId,
+                decoration: const InputDecoration(labelText: 'Mall'),
+                items: [
+                  if (draft?.cityId != null)
+                    for (final mall in appState.getMallsByCity(draft!.cityId!))
+                      DropdownMenuItem(value: mall.id, child: Text(mall.name)),
+                ],
+                onChanged: draft?.cityId == null
+                    ? null
+                    : (mallId) {
+                        final updatedDraft = draft ?? ParkingDraft();
+                        updatedDraft.mallId = mallId;
+                        appState.updateParkingDraft(updatedDraft);
+                      },
+              ),
+              if (draft?.cityId == null)
+                const Text('Pilih kota terlebih dahulu.'),
+              if (draft?.cityId != null &&
+                  appState.getMallsByCity(draft!.cityId!).isEmpty)
+                const Text('Tidak ada mall di kota ini.'),
+              const SizedBox(height: 16),
+            ],
             TextButton(
               onPressed: () {
                 final currentDraft = appState.parkingDraft;
@@ -76,6 +122,29 @@ class AddParkingPage extends StatelessWidget {
                     ),
                   );
                   return;
+                }
+                if (currentDraft?.mode == 'structured') {
+                  if (currentDraft?.category == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Pilih kategori tempat.')),
+                    );
+                    return;
+                  }
+                  if (currentDraft?.category == 'mall' &&
+                      currentDraft?.mallId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Pilih mall.')),
+                    );
+                    return;
+                  }
+                  if (currentDraft?.category != 'mall') {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Input nama tempat belum tersedia.'),
+                      ),
+                    );
+                    return;
+                  }
                 }
                 Navigator.pushNamed(context, AppRoutes.capturePhoto);
               },
