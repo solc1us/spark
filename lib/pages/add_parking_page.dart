@@ -111,6 +111,25 @@ class AddParkingPage extends StatelessWidget {
                 const Text('Tidak ada mall di kota ini.'),
               const SizedBox(height: 16),
             ],
+            if (draft?.mode == 'free' ||
+                (draft?.mode == 'structured' &&
+                    (draft?.category == 'event' ||
+                        draft?.category == 'other'))) ...[
+              TextFormField(
+                key: ValueKey('${draft?.mode}-${draft?.category}'),
+                initialValue: draft?.placeName,
+                decoration: InputDecoration(
+                  labelText: 'Nama tempat',
+                  helperText: draft?.mode == 'free' ? 'Opsional' : 'Wajib diisi',
+                ),
+                onChanged: (placeName) {
+                  final updatedDraft = draft ?? ParkingDraft();
+                  updatedDraft.placeName = placeName;
+                  appState.updateParkingDraft(updatedDraft);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
             TextButton(
               onPressed: () {
                 final currentDraft = appState.parkingDraft;
@@ -137,11 +156,10 @@ class AddParkingPage extends StatelessWidget {
                     );
                     return;
                   }
-                  if (currentDraft?.category != 'mall') {
+                  if (currentDraft?.category != 'mall' &&
+                      (currentDraft?.placeName?.trim().isEmpty ?? true)) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Input nama tempat belum tersedia.'),
-                      ),
+                      const SnackBar(content: Text('Isi nama tempat.')),
                     );
                     return;
                   }

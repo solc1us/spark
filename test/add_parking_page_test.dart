@@ -102,4 +102,107 @@ void main() {
     expect(find.text('Halaman foto'), findsOneWidget);
     expect(state.parkingDraft?.mallId, 'mall-pvj');
   });
+
+  for (final category in ['event', 'other']) {
+    testWidgets('$category requires a place name and keeps it when going back', (
+      tester,
+    ) async {
+      final state = AppState();
+      addTearDown(state.dispose);
+      state.updateParkingDraft(
+        ParkingDraft(
+          cityId: 'city-bandung',
+          mode: 'structured',
+          category: category,
+        ),
+      );
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: state,
+          child: MaterialApp(
+            home: const AddParkingPage(),
+            routes: {
+              AppRoutes.capturePhoto: (_) =>
+                  const Scaffold(body: Text('Halaman foto')),
+            },
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextFormField), '   ');
+      await tester.tap(find.text('Capture Photo'));
+      await tester.pump();
+      expect(find.text('Isi nama tempat.'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextFormField), 'Pameran Kampus');
+      await tester.tap(find.text('Capture Photo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Halaman foto'), findsOneWidget);
+      expect(state.parkingDraft?.placeName, 'Pameran Kampus');
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Pameran Kampus'), findsOneWidget);
+    });
+  }
+
+  testWidgets('free mode allows an empty place name', (tester) async {
+    final state = AppState();
+    addTearDown(state.dispose);
+    state.updateParkingDraft(ParkingDraft(cityId: 'city-bandung', mode: 'free'));
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: MaterialApp(
+          home: const AddParkingPage(),
+          routes: {
+            AppRoutes.capturePhoto: (_) =>
+                const Scaffold(body: Text('Halaman foto')),
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Opsional'), findsOneWidget);
+    await tester.tap(find.text('Capture Photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Halaman foto'), findsOneWidget);
+  });
+
+  testWidgets('changing category and mode clears the old place name', (
+    tester,
+  ) async {
+    final state = AppState();
+    addTearDown(state.dispose);
+    state.updateParkingDraft(
+      ParkingDraft(
+        cityId: 'city-bandung',
+        mode: 'structured',
+        category: 'event',
+        placeName: 'Event lama',
+      ),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: const MaterialApp(home: AddParkingPage()),
+      ),
+    );
+
+    await tester.tap(find.text('Event'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lainnya').last);
+    await tester.pumpAndSettle();
+    expect(state.parkingDraft?.placeName, isNull);
+    expect(find.text('Event lama'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField), 'Tempat lain');
+    await tester.tap(find.text('Terstruktur'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bebas').last);
+    await tester.pumpAndSettle();
+    expect(state.parkingDraft?.placeName, isNull);
+    await tester.enterText(find.byType(TextFormField), 'Lokasi bebas');
+    expect(state.parkingDraft?.placeName, 'Lokasi bebas');
+  });
 }
