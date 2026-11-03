@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/parking_session.dart';
 import '../routes/app_routes.dart';
+import '../state/app_state.dart';
 
 class ParkingHistoryPage extends StatelessWidget {
   const ParkingHistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final historySessions = state.parkingHistory;
+
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
@@ -61,10 +67,10 @@ class ParkingHistoryPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Daftar Riwayat',
                   style: TextStyle(
                     fontSize: 18,
@@ -72,8 +78,8 @@ class ParkingHistoryPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '0 Sesi',
-                  style: TextStyle(
+                  '${historySessions.length} Sesi',
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Colors.indigo,
                     fontWeight: FontWeight.bold,
@@ -82,7 +88,14 @@ class ParkingHistoryPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            _buildEmptyState(context),
+            if (historySessions.isEmpty)
+              _buildEmptyState(context)
+            else
+              Column(
+                children: historySessions
+                    .map((session) => _buildHistoryCard(context, session))
+                    .toList(),
+              ),
           ],
         ),
       ),
@@ -143,6 +156,69 @@ class ParkingHistoryPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryCard(BuildContext context, ParkingSession session) {
+    String namaTempat = 'Lokasi Parkir';
+    if (session.placeName != null) {
+      namaTempat = session.placeName.toString();
+    }
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.parkingDetail,
+          arguments: session.id,
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12.0),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.check_circle_outline,
+              color: Colors.green,
+              size: 32,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    namaTempat,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Area ${session.areaCode} • ID: ${session.id}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              color: Colors.indigo,
+            ),
+          ],
+        ),
       ),
     );
   }
