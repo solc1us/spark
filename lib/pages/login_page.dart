@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../routes/app_routes.dart';
 import '../state/app_state.dart';
+import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,10 +18,6 @@ class _LoginPageState extends State<LoginPage> {
 
   String emailError = '';
   String passwordError = '';
-
-  final Color orange = const Color(0xFFEA580C);
-  final Color dark = const Color(0xFF172033);
-  final Color grey = const Color(0xFF64748B);
 
   bool validateEmail() {
     String email = _emailController.text;
@@ -93,207 +90,212 @@ class _LoginPageState extends State<LoginPage> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'SPARK',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: orange,
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 3,
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'SPARK',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFFEA580C),
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 3,
                   ),
+                ),
 
-                  const SizedBox(height: 8),
+                const SizedBox(height: 8),
 
-                  Text(
-                    'Spot My Park',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: grey, fontSize: 15),
+                const Text(
+                  'Spot My Park',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Color(0xFF64748B), fontSize: 15),
+                ),
+
+                const SizedBox(height: 36),
+
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x11000000),
+                        blurRadius: 15,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
                   ),
-
-                  const SizedBox(height: 36),
-
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x11000000),
-                          blurRadius: 15,
-                          offset: Offset(0, 5),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Selamat datang kembali!',
+                        style: TextStyle(
+                          color: Color(0xFF172033),
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Selamat datang kembali!',
-                          style: TextStyle(
-                            color: dark,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      const Text(
+                        'Masuk untuk menyimpan dan menemukan kembali lokasi parkirmu.',
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      const Text(
+                        'Email',
+                        style: TextStyle(
+                          color: Color(0xFF172033),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          hintText: 'Masukkan email',
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        Text(
-                          'Masuk untuk menyimpan dan menemukan kembali lokasi parkirmu.',
-                          style: TextStyle(
-                            color: grey,
-                            fontSize: 14,
-                            height: 1.5,
-                          ),
-                        ),
-
-                        const SizedBox(height: 28),
-
-                        Text(
-                          'Email',
-                          style: TextStyle(
-                            color: dark,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        TextField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            hintText: 'Masukkan email',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFEA580C),
+                              width: 2,
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: orange, width: 2),
+                          ),
+                        ),
+                      ),
+
+                      if (emailError != '')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            emailError,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
                             ),
                           ),
                         ),
 
-                        if (emailError != '')
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
+                      const SizedBox(height: 20),
+
+                      const Text(
+                        'Password',
+                        style: TextStyle(
+                          color: Color(0xFF172033),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      TextField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          hintText: 'Masukkan password',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFEA580C),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      if (passwordError != '')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            passwordError,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+
+                      const SizedBox(height: 28),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFEA580C),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Masuk',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Flexible(
                             child: Text(
-                              emailError,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
-                              ),
+                              'Belum punya akun?',
+                              style: TextStyle(color: Color(0xFF64748B)),
                             ),
                           ),
 
-                        const SizedBox(height: 20),
-
-                        Text(
-                          'Password',
-                          style: TextStyle(
-                            color: dark,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            hintText: 'Masukkan password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: orange, width: 2),
-                            ),
-                          ),
-                        ),
-
-                        if (passwordError != '')
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              passwordError,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-
-                        const SizedBox(height: 28),
-
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: _login,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: orange,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const RegisterPage(),
+                                ),
+                              );
+                            },
                             child: const Text(
-                              'Masuk',
+                              'Daftar sekarang',
                               style: TextStyle(
-                                fontSize: 16,
+                                color: Color(0xFFEA580C),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                'Belum punya akun?',
-                                style: TextStyle(color: grey),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.register,
-                                );
-                              },
-                              child: Text(
-                                'Daftar sekarang',
-                                style: TextStyle(
-                                  color: orange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
