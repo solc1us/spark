@@ -15,6 +15,7 @@ class AddParkingPage extends StatefulWidget {
 class _AddParkingPageState extends State<AddParkingPage> {
   static const _areaCodes = ['B1', 'B2', 'R1', 'R2'];
   String? _areaSelection;
+  String _reminderText = '';
 
   @override
   void initState() {
@@ -23,6 +24,9 @@ class _AddParkingPageState extends State<AddParkingPage> {
     if (areaCode != null && areaCode.isNotEmpty) {
       _areaSelection = _areaCodes.contains(areaCode) ? areaCode : 'other';
     }
+    _reminderText =
+        context.read<AppState>().parkingDraft?.reminderMinutes?.toString() ??
+        '';
   }
 
   @override
@@ -192,6 +196,21 @@ class _AddParkingPageState extends State<AddParkingPage> {
               },
             ),
             const SizedBox(height: 16),
+            TextFormField(
+              initialValue: _reminderText,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Pengingat (menit, opsional)',
+                hintText: 'Contoh: 60',
+              ),
+              onChanged: (value) {
+                _reminderText = value;
+                final updatedDraft = draft ?? ParkingDraft();
+                updatedDraft.reminderMinutes = int.tryParse(value.trim());
+                appState.updateParkingDraft(updatedDraft);
+              },
+            ),
+            const SizedBox(height: 16),
             TextButton(
               onPressed: () {
                 final currentDraft = appState.parkingDraft;
@@ -230,6 +249,18 @@ class _AddParkingPageState extends State<AddParkingPage> {
                     (currentDraft?.areaCode?.trim().isEmpty ?? true)) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Isi kode area parkir.')),
+                  );
+                  return;
+                }
+                if (_reminderText.trim().isNotEmpty &&
+                    (currentDraft?.reminderMinutes == null ||
+                        currentDraft!.reminderMinutes! <= 0)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Isi durasi pengingat dengan menit positif.',
+                      ),
+                    ),
                   );
                   return;
                 }

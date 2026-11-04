@@ -372,4 +372,76 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Halaman foto'), findsOneWidget);
   });
+
+  testWidgets('reminder must be positive and is preserved when returning', (
+    tester,
+  ) async {
+    await useTallScreen(tester);
+    final state = AppState();
+    addTearDown(state.dispose);
+    state.updateParkingDraft(
+      ParkingDraft(cityId: 'city-bandung', mode: 'free'),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: MaterialApp(
+          home: const AddParkingPage(),
+          routes: {
+            AppRoutes.capturePhoto: (_) =>
+                const Scaffold(body: Text('Halaman foto')),
+          },
+        ),
+      ),
+    );
+
+    final reminder = find.widgetWithText(
+      TextFormField,
+      'Pengingat (menit, opsional)',
+    );
+    for (final value in ['0', '-1', 'abc', '1.5']) {
+      await tester.enterText(reminder, value);
+      await tester.ensureVisible(find.text('Capture Photo'));
+      await tester.tap(find.text('Capture Photo'));
+      await tester.pump();
+      expect(
+        find.text('Isi durasi pengingat dengan menit positif.'),
+        findsOneWidget,
+      );
+      ScaffoldMessenger.of(tester.element(find.byType(AddParkingPage)))
+          .removeCurrentSnackBar();
+      await tester.pumpAndSettle();
+    }
+
+    await tester.enterText(reminder, '60');
+    expect(state.parkingDraft?.reminderMinutes, 60);
+    await tester.tap(find.text('Capture Photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Halaman foto'), findsOneWidget);
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+    expect(find.text('60'), findsOneWidget);
+
+    await tester.enterText(reminder, '');
+    expect(state.parkingDraft?.reminderMinutes, isNull);
+    await tester.tap(find.text('Capture Photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Halaman foto'), findsOneWidget);
+  });
+
+  testWidgets('reminder is restored from an existing draft', (tester) async {
+    await useTallScreen(tester);
+    final state = AppState();
+    addTearDown(state.dispose);
+    state.updateParkingDraft(
+      ParkingDraft(cityId: 'city-bandung', mode: 'free', reminderMinutes: 45),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: const MaterialApp(home: AddParkingPage()),
+      ),
+    );
+    expect(find.text('45'), findsOneWidget);
+  });
 }
