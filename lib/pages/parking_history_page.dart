@@ -29,7 +29,7 @@ class ParkingHistoryPage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.indigo,
+                color: const Color(0xFFEA580C),
                 borderRadius: BorderRadius.circular(12.0),
               ),
               child: const Row(
@@ -81,7 +81,7 @@ class ParkingHistoryPage extends StatelessWidget {
                   '${historySessions.length} Sesi',
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.indigo,
+                    color: Colors.black87,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -147,7 +147,7 @@ class ParkingHistoryPage extends StatelessWidget {
                 Navigator.pushNamed(context, AppRoutes.addParking);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
+                backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -220,7 +220,7 @@ class ParkingHistoryPage extends StatelessWidget {
             ),
             const Icon(
               Icons.chevron_right,
-              color: Colors.indigo,
+              color: Colors.black87,
             ),
           ],
         ),
