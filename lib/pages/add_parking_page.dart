@@ -4,8 +4,25 @@ import '../models/parking_draft.dart';
 import '../routes/app_routes.dart';
 import '../state/app_state.dart';
 
-class AddParkingPage extends StatelessWidget {
+class AddParkingPage extends StatefulWidget {
   const AddParkingPage({super.key});
+
+  @override
+  State<AddParkingPage> createState() => _AddParkingPageState();
+}
+
+class _AddParkingPageState extends State<AddParkingPage> {
+  static const _areaCodes = ['B1', 'B2', 'R1', 'R2'];
+  String? _areaSelection;
+
+  @override
+  void initState() {
+    super.initState();
+    final areaCode = context.read<AppState>().parkingDraft?.areaCode;
+    if (areaCode != null && areaCode.isNotEmpty) {
+      _areaSelection = _areaCodes.contains(areaCode) ? areaCode : 'other';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +147,42 @@ class AddParkingPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
             ],
+            DropdownButtonFormField<String>(
+              initialValue: _areaSelection,
+              decoration: const InputDecoration(
+                labelText: 'Area parkir',
+                helperText: 'Opsional',
+              ),
+              items: const [
+                DropdownMenuItem(value: '', child: Text('Tanpa area')),
+                DropdownMenuItem(value: 'B1', child: Text('B1')),
+                DropdownMenuItem(value: 'B2', child: Text('B2')),
+                DropdownMenuItem(value: 'R1', child: Text('R1')),
+                DropdownMenuItem(value: 'R2', child: Text('R2')),
+                DropdownMenuItem(value: 'other', child: Text('Lainnya')),
+              ],
+              onChanged: (area) {
+                setState(() => _areaSelection = area);
+                final updatedDraft = draft ?? ParkingDraft();
+                updatedDraft.areaCode = area == 'other' || area == ''
+                    ? null
+                    : area;
+                appState.updateParkingDraft(updatedDraft);
+              },
+            ),
+            if (_areaSelection == 'other') ...[
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: draft?.areaCode,
+                decoration: const InputDecoration(labelText: 'Kode area'),
+                onChanged: (areaCode) {
+                  final updatedDraft = draft ?? ParkingDraft();
+                  updatedDraft.areaCode = areaCode;
+                  appState.updateParkingDraft(updatedDraft);
+                },
+              ),
+            ],
+            const SizedBox(height: 16),
             TextButton(
               onPressed: () {
                 final currentDraft = appState.parkingDraft;
@@ -163,6 +216,13 @@ class AddParkingPage extends StatelessWidget {
                     );
                     return;
                   }
+                }
+                if (_areaSelection == 'other' &&
+                    (currentDraft?.areaCode?.trim().isEmpty ?? true)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Isi kode area parkir.')),
+                  );
+                  return;
                 }
                 Navigator.pushNamed(context, AppRoutes.capturePhoto);
               },
