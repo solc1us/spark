@@ -6,10 +6,16 @@ import 'package:spark/pages/add_parking_page.dart';
 import 'package:spark/routes/app_routes.dart';
 import 'package:spark/state/app_state.dart';
 
+Future<void> useTallScreen(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(800, 1200));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+}
+
 void main() {
   testWidgets('mall follows the city and stale selections are cleared', (
     tester,
   ) async {
+    await useTallScreen(tester);
     final state = AppState();
     addTearDown(state.dispose);
     state.updateParkingDraft(
@@ -59,6 +65,7 @@ void main() {
   testWidgets('structured form validates category and mall before continuing', (
     tester,
   ) async {
+    await useTallScreen(tester);
     final state = AppState();
     addTearDown(state.dispose);
     state.updateParkingDraft(
@@ -70,9 +77,8 @@ void main() {
         child: MaterialApp(
           home: const AddParkingPage(),
           routes: {
-            AppRoutes.capturePhoto: (_) => const Scaffold(
-              body: Text('Halaman foto'),
-            ),
+            AppRoutes.capturePhoto: (_) =>
+                const Scaffold(body: Text('Halaman foto')),
           },
         ),
       ),
@@ -104,52 +110,65 @@ void main() {
   });
 
   for (final category in ['event', 'other']) {
-    testWidgets('$category requires a place name and keeps it when going back', (
-      tester,
-    ) async {
-      final state = AppState();
-      addTearDown(state.dispose);
-      state.updateParkingDraft(
-        ParkingDraft(
-          cityId: 'city-bandung',
-          mode: 'structured',
-          category: category,
-        ),
-      );
-      await tester.pumpWidget(
-        ChangeNotifierProvider.value(
-          value: state,
-          child: MaterialApp(
-            home: const AddParkingPage(),
-            routes: {
-              AppRoutes.capturePhoto: (_) =>
-                  const Scaffold(body: Text('Halaman foto')),
-            },
+    testWidgets(
+      '$category requires a place name and keeps it when going back',
+      (tester) async {
+        await useTallScreen(tester);
+        final state = AppState();
+        addTearDown(state.dispose);
+        state.updateParkingDraft(
+          ParkingDraft(
+            cityId: 'city-bandung',
+            mode: 'structured',
+            category: category,
           ),
-        ),
-      );
+        );
+        await tester.pumpWidget(
+          ChangeNotifierProvider.value(
+            value: state,
+            child: MaterialApp(
+              home: const AddParkingPage(),
+              routes: {
+                AppRoutes.capturePhoto: (_) =>
+                    const Scaffold(body: Text('Halaman foto')),
+              },
+            ),
+          ),
+        );
 
-      await tester.enterText(find.byType(TextFormField), '   ');
-      await tester.tap(find.text('Capture Photo'));
-      await tester.pump();
-      expect(find.text('Isi nama tempat.'), findsOneWidget);
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nama tempat'),
+          '   ',
+        );
+        await tester.ensureVisible(find.text('Capture Photo'));
+        await tester.tap(find.text('Capture Photo'));
+        await tester.pump();
+        expect(find.text('Isi nama tempat.'), findsOneWidget);
 
-      await tester.enterText(find.byType(TextFormField), 'Pameran Kampus');
-      await tester.tap(find.text('Capture Photo'));
-      await tester.pumpAndSettle();
-      expect(find.text('Halaman foto'), findsOneWidget);
-      expect(state.parkingDraft?.placeName, 'Pameran Kampus');
+        await tester.enterText(
+          find.widgetWithText(TextFormField, 'Nama tempat'),
+          'Pameran Kampus',
+        );
+        await tester.ensureVisible(find.text('Capture Photo'));
+        await tester.tap(find.text('Capture Photo'));
+        await tester.pumpAndSettle();
+        expect(find.text('Halaman foto'), findsOneWidget);
+        expect(state.parkingDraft?.placeName, 'Pameran Kampus');
 
-      tester.state<NavigatorState>(find.byType(Navigator)).pop();
-      await tester.pumpAndSettle();
-      expect(find.text('Pameran Kampus'), findsOneWidget);
-    });
+        tester.state<NavigatorState>(find.byType(Navigator)).pop();
+        await tester.pumpAndSettle();
+        expect(find.text('Pameran Kampus'), findsOneWidget);
+      },
+    );
   }
 
   testWidgets('free mode allows an empty place name', (tester) async {
+    await useTallScreen(tester);
     final state = AppState();
     addTearDown(state.dispose);
-    state.updateParkingDraft(ParkingDraft(cityId: 'city-bandung', mode: 'free'));
+    state.updateParkingDraft(
+      ParkingDraft(cityId: 'city-bandung', mode: 'free'),
+    );
     await tester.pumpWidget(
       ChangeNotifierProvider.value(
         value: state,
@@ -164,6 +183,7 @@ void main() {
     );
 
     expect(find.text('Opsional'), findsNWidgets(2));
+    await tester.ensureVisible(find.text('Capture Photo'));
     await tester.tap(find.text('Capture Photo'));
     await tester.pumpAndSettle();
     expect(find.text('Halaman foto'), findsOneWidget);
@@ -172,6 +192,7 @@ void main() {
   testWidgets('changing category and mode clears the old place name', (
     tester,
   ) async {
+    await useTallScreen(tester);
     final state = AppState();
     addTearDown(state.dispose);
     state.updateParkingDraft(
@@ -196,20 +217,29 @@ void main() {
     expect(state.parkingDraft?.placeName, isNull);
     expect(find.text('Event lama'), findsNothing);
 
-    await tester.enterText(find.byType(TextFormField), 'Tempat lain');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Nama tempat'),
+      'Tempat lain',
+    );
     await tester.tap(find.text('Terstruktur'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Bebas').last);
     await tester.pumpAndSettle();
     expect(state.parkingDraft?.placeName, isNull);
-    await tester.enterText(find.byType(TextFormField), 'Lokasi bebas');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Nama tempat'),
+      'Lokasi bebas',
+    );
     expect(state.parkingDraft?.placeName, 'Lokasi bebas');
   });
 
   testWidgets('area can be selected and cleared', (tester) async {
+    await useTallScreen(tester);
     final state = AppState();
     addTearDown(state.dispose);
-    state.updateParkingDraft(ParkingDraft(cityId: 'city-bandung', mode: 'free'));
+    state.updateParkingDraft(
+      ParkingDraft(cityId: 'city-bandung', mode: 'free'),
+    );
     await tester.pumpWidget(
       ChangeNotifierProvider.value(
         value: state,
@@ -236,9 +266,12 @@ void main() {
   testWidgets('manual area is required and preserved when returning', (
     tester,
   ) async {
+    await useTallScreen(tester);
     final state = AppState();
     addTearDown(state.dispose);
-    state.updateParkingDraft(ParkingDraft(cityId: 'city-bandung', mode: 'free'));
+    state.updateParkingDraft(
+      ParkingDraft(cityId: 'city-bandung', mode: 'free'),
+    );
     await tester.pumpWidget(
       ChangeNotifierProvider.value(
         value: state,
@@ -256,7 +289,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Lainnya'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextFormField, 'Kode area'), ' ');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Kode area'),
+      ' ',
+    );
     await tester.ensureVisible(find.text('Capture Photo'));
     await tester.tap(find.text('Capture Photo'));
     await tester.pump();
@@ -277,6 +313,7 @@ void main() {
   });
 
   testWidgets('manual area is restored from an existing draft', (tester) async {
+    await useTallScreen(tester);
     final state = AppState();
     addTearDown(state.dispose);
     state.updateParkingDraft(
@@ -290,5 +327,49 @@ void main() {
     );
     expect(find.text('P3'), findsOneWidget);
     expect(find.text('Kode area'), findsOneWidget);
+  });
+
+  testWidgets('notes are optional and preserved when returning', (
+    tester,
+  ) async {
+    await useTallScreen(tester);
+    final state = AppState();
+    addTearDown(state.dispose);
+    state.updateParkingDraft(
+      ParkingDraft(cityId: 'city-bandung', mode: 'free'),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: MaterialApp(
+          home: const AddParkingPage(),
+          routes: {
+            AppRoutes.capturePhoto: (_) =>
+                const Scaffold(body: Text('Halaman foto')),
+          },
+        ),
+      ),
+    );
+
+    final notes = find.widgetWithText(TextFormField, 'Catatan (opsional)');
+    await tester.ensureVisible(notes);
+    await tester.enterText(notes, 'Dekat pilar A');
+    expect(state.parkingDraft?.notes, 'Dekat pilar A');
+
+    await tester.ensureVisible(find.text('Capture Photo'));
+    await tester.tap(find.text('Capture Photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Halaman foto'), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(notes);
+    expect(find.text('Dekat pilar A'), findsOneWidget);
+
+    await tester.enterText(notes, '');
+    await tester.ensureVisible(find.text('Capture Photo'));
+    await tester.tap(find.text('Capture Photo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Halaman foto'), findsOneWidget);
   });
 }
