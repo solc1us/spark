@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/parking_draft.dart';
 import '../routes/app_routes.dart';
 import '../state/app_state.dart';
@@ -40,10 +41,7 @@ class _AddParkingPageState extends State<AddParkingPage> {
               decoration: const InputDecoration(labelText: 'Kota'),
               items: [
                 for (final city in appState.cities)
-                  DropdownMenuItem(
-                    value: city.id,
-                    child: Text(city.name),
-                  ),
+                  DropdownMenuItem(value: city.id, child: Text(city.name)),
               ],
               onChanged: (cityId) {
                 final updatedDraft = draft ?? ParkingDraft();
@@ -57,18 +55,13 @@ class _AddParkingPageState extends State<AddParkingPage> {
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: draft?.mode,
-              decoration: const InputDecoration(
-                labelText: 'Metode pencatatan',
-              ),
+              decoration: const InputDecoration(labelText: 'Metode pencatatan'),
               items: const [
                 DropdownMenuItem(
                   value: 'structured',
                   child: Text('Terstruktur'),
                 ),
-                DropdownMenuItem(
-                  value: 'free',
-                  child: Text('Bebas'),
-                ),
+                DropdownMenuItem(value: 'free', child: Text('Bebas')),
               ],
               onChanged: (mode) {
                 final updatedDraft = draft ?? ParkingDraft();
@@ -137,7 +130,9 @@ class _AddParkingPageState extends State<AddParkingPage> {
                 initialValue: draft?.placeName,
                 decoration: InputDecoration(
                   labelText: 'Nama tempat',
-                  helperText: draft?.mode == 'free' ? 'Opsional' : 'Wajib diisi',
+                  helperText: draft?.mode == 'free'
+                      ? 'Opsional'
+                      : 'Wajib diisi',
                 ),
                 onChanged: (placeName) {
                   final updatedDraft = draft ?? ParkingDraft();
@@ -182,6 +177,20 @@ class _AddParkingPageState extends State<AddParkingPage> {
                 },
               ),
             ],
+            const SizedBox(height: 16),
+            TextFormField(
+              initialValue: draft?.notes,
+              decoration: const InputDecoration(
+                labelText: 'Catatan (opsional)',
+                hintText: 'Contoh: dekat pintu masuk',
+              ),
+              maxLines: 3,
+              onChanged: (notes) {
+                final updatedDraft = draft ?? ParkingDraft();
+                updatedDraft.notes = notes;
+                appState.updateParkingDraft(updatedDraft);
+              },
+            ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () {
