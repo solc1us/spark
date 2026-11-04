@@ -70,6 +70,7 @@ class ParkingDetailPage extends StatelessWidget {
     }
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
           'Detail Parkir',
@@ -123,7 +124,7 @@ class ParkingDetailPage extends StatelessWidget {
                   child: Image.file(
                     File(session.photoPath),
                     height: 200,
-                    width: double.infinity,
+                    width: 200,
                     fit: BoxFit.cover,
                     errorBuilder: (_, _, _) => Container(
                       height: 200,
@@ -157,6 +158,8 @@ class ParkingDetailPage extends StatelessWidget {
                 if (session.notes != null)
                   detailpage('Catatan', session.notes!),
                 detailpage('Waktu parkir', formatDate(session.createdAt)),
+                if (session.completedAt != null)
+                  detailpage('Waktu selesai', formatDate(session.completedAt!)),
                 detailpage(
                   'Koordinat',
                   '${session.latitude}, ${session.longitude}',
@@ -164,65 +167,69 @@ class ParkingDetailPage extends StatelessWidget {
                 if (session.reminderMinutes != null)
                   detailpage('Pengingat', '${session.reminderMinutes} menit'),
                 detailpage('Status', session.status),
-                if (session.completedAt != null)
-                  detailpage('Waktu selesai', formatDate(session.completedAt!)),
-                if (session.status == 'active')
-                  ElevatedButton(
-                    onPressed: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Selesaikan parkir?'),
-                          content: const Text(
-                            'Kendaraan sudah ditemukan dan diambil?',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Batal'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Selesai'),
-                            ),
-                          ],
-                        ),
-                      );
-
-                      if (confirm == true && context.mounted) {
-                        context.read<AppState>().completeParking(session.id);
-
-                        var reminderCancelled = true;
-                        if (session.reminderMinutes != null) {
-                          reminderCancelled =
-                              await NotificationService.cancelReminder(
-                                session.id,
-                              );
-                        }
-
-                        if (!context.mounted) return;
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              reminderCancelled
-                                  ? 'Parkir selesai.'
-                                  : 'Parkir selesai, tetapi pengingat belum berhasil dibatalkan.',
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      'Selesai Parkir',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color.fromARGB(255, 134, 57, 16),
-                      ),
-                    ),
-                  ),
               ],
             ),
+      bottomNavigationBar: session != null && session.status == 'active'
+          ? SafeArea(
+              minimum: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: ElevatedButton(
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: Colors.white,
+                      title: const Text('Selesaikan parkir?'),
+                      content: const Text(
+                        'Apakah kendaraan sudah ditemukan dan diambil?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Batal'),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.grey.shade200,
+                            foregroundColor: Colors.black,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Selesai'),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.orange.shade100,
+                            foregroundColor: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm == true && context.mounted) {
+                    context.read<AppState>().completeParking(session.id);
+
+                    var reminderCancelled = true;
+                    if (session.reminderMinutes != null) {
+                      reminderCancelled =
+                          await NotificationService.cancelReminder(session.id);
+                    }
+
+                    if (!context.mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          reminderCancelled ? 'Parkir selesai.' : 'Parkir selesai, tetapi pengingat belum berhasil dibatalkan.',
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: const Text(
+                  'Selesai Parkir',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
