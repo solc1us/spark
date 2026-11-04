@@ -21,8 +21,14 @@ class HomePage extends StatelessWidget {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
-          'Spark – Spot My Park',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          'SPARK',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFFEA580C),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 3,
+                  ),
         ),
         actions: [
           TextButton.icon(
@@ -55,7 +61,7 @@ class HomePage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.indigo,
+                color: const Color(0xFFEA580C),
                 borderRadius: BorderRadius.circular(12.0),
               ),
               child: Row(
@@ -107,7 +113,7 @@ class HomePage extends StatelessWidget {
                   '${activeSessions.length} Sesi',
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.indigo,
+                    color: Colors.black87,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -129,7 +135,7 @@ class HomePage extends StatelessWidget {
         onPressed: () {
           Navigator.pushNamed(context, AppRoutes.addParking);
         },
-        backgroundColor: Colors.indigo,
+        backgroundColor: const Color(0xFFEA580C),
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
@@ -188,7 +194,7 @@ class HomePage extends StatelessWidget {
                 Navigator.pushNamed(context, AppRoutes.addParking);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
+                backgroundColor: const Color(0xFFEA580C),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -241,13 +247,13 @@ class HomePage extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color:  Colors.grey.shade300),
         ),
         child: Row(
           children: [
             const Icon(
               Icons.local_parking,
-              color: Colors.indigo,
+              color:  Colors.orange,
               size: 32,
             ),
             const SizedBox(width: 12),
@@ -267,7 +273,7 @@ class HomePage extends StatelessWidget {
                     '$kodeArea • ID: ${session.id}',
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Colors.grey,
+                      color: Colors.black87,
                     ),
                   ),
                 ],
@@ -275,7 +281,7 @@ class HomePage extends StatelessWidget {
             ),
             const Icon(
               Icons.chevron_right,
-              color: Colors.indigo,
+              color: Colors.black,
             ),
           ],
         ),
