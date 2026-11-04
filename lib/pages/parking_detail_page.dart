@@ -6,6 +6,9 @@ import 'package:provider/provider.dart';
 import '../services/notification_service.dart';
 import '../state/app_state.dart';
 
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+
 class ParkingDetailPage extends StatelessWidget {
   const ParkingDetailPage({super.key, this.parkingSessionId});
 
@@ -164,6 +167,37 @@ class ParkingDetailPage extends StatelessWidget {
                   'Koordinat',
                   '${session.latitude}, ${session.longitude}',
                 ),
+                SizedBox(
+                  height: 200,
+                  child: FlutterMap(
+                    options: MapOptions(
+                      initialCenter: LatLng(
+                        session.latitude,
+                        session.longitude,
+                      ),
+                      initialZoom: 16,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.spark',
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: LatLng(session.latitude, session.longitude),
+                            child: const Icon(
+                              Icons.location_pin,
+                              color: Colors.red,
+                              size: 40,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
                 if (session.reminderMinutes != null)
                   detailpage('Pengingat', '${session.reminderMinutes} menit'),
                 detailpage('Status', session.status),
@@ -185,19 +219,19 @@ class ParkingDetailPage extends StatelessWidget {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Batal'),
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.grey.shade200,
                             foregroundColor: Colors.black,
                           ),
+                          child: const Text('Batal'),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Selesai'),
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.orange.shade100,
                             foregroundColor: Colors.black,
                           ),
+                          child: const Text('Selesai'),
                         ),
                       ],
                     ),
