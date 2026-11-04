@@ -54,7 +54,7 @@ class ParkingHistoryPage extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Daftar seluruh sesi parkir yang sudah selesai maupun yang masih berlangsung.',
+                          'Daftar seluruh sesi parkir yang telah selesai beserta detail lokasinya.',
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.white70,
@@ -162,8 +162,13 @@ class ParkingHistoryPage extends StatelessWidget {
 
   Widget _buildHistoryCard(BuildContext context, ParkingSession session) {
     String namaTempat = 'Lokasi Parkir';
-    if (session.placeName != null) {
-      namaTempat = session.placeName.toString();
+    if (session.placeName != null && session.placeName!.trim().isNotEmpty) {
+      namaTempat = session.placeName!;
+    }
+
+    String kodeArea = 'Tanpa Area';
+    if (session.areaCode != null && session.areaCode!.trim().isNotEmpty) {
+      kodeArea = 'Area ${session.areaCode}';
     }
 
     return GestureDetector(
@@ -204,7 +209,7 @@ class ParkingHistoryPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Area ${session.areaCode} • ID: ${session.id}',
+                    '$kodeArea • ID: ${session.id}',
                     style: const TextStyle(
                       fontSize: 13,
                       color: Colors.grey,

@@ -13,7 +13,7 @@ class HomePage extends StatelessWidget {
     final activeSessions = state.activeSessions;
 
     String userName = 'Pengguna Spark';
-    if (state.currentUser != null) {
+    if (state.currentUser != null && state.currentUser!.name.trim().isNotEmpty) {
       userName = state.currentUser!.name;
     }
 
@@ -217,8 +217,13 @@ class HomePage extends StatelessWidget {
 
   Widget _buildSessionCard(BuildContext context, ParkingSession session) {
     String namaTempat = 'Lokasi Parkir';
-    if (session.placeName != null) {
-      namaTempat = session.placeName.toString();
+    if (session.placeName != null && session.placeName!.trim().isNotEmpty) {
+      namaTempat = session.placeName!;
+    }
+
+    String kodeArea = 'Tanpa Area';
+    if (session.areaCode != null && session.areaCode!.trim().isNotEmpty) {
+      kodeArea = 'Area ${session.areaCode}';
     }
 
     return GestureDetector(
@@ -259,7 +264,7 @@ class HomePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Area ${session.areaCode} • ID: ${session.id}',
+                    '$kodeArea • ID: ${session.id}',
                     style: const TextStyle(
                       fontSize: 13,
                       color: Colors.grey,
