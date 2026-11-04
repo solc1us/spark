@@ -34,64 +34,52 @@ class _AddParkingPageState extends State<AddParkingPage> {
     final appState = context.watch<AppState>();
     final draft = appState.parkingDraft;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add Parking')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            DropdownButtonFormField<String>(
-              initialValue: draft?.cityId,
-              decoration: const InputDecoration(labelText: 'Kota'),
-              items: [
-                for (final city in appState.cities)
-                  DropdownMenuItem(value: city.id, child: Text(city.name)),
-              ],
-              onChanged: (cityId) {
-                final updatedDraft = draft ?? ParkingDraft();
-                if (updatedDraft.cityId != cityId) {
-                  updatedDraft.cityId = cityId;
-                  updatedDraft.mallId = null;
-                  appState.updateParkingDraft(updatedDraft);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: draft?.mode,
-              decoration: const InputDecoration(labelText: 'Metode pencatatan'),
-              items: const [
-                DropdownMenuItem(
-                  value: 'structured',
-                  child: Text('Terstruktur'),
-                ),
-                DropdownMenuItem(value: 'free', child: Text('Bebas')),
-              ],
-              onChanged: (mode) {
-                final updatedDraft = draft ?? ParkingDraft();
-                if (updatedDraft.mode != mode) {
-                  updatedDraft.mode = mode;
-                  updatedDraft.category = null;
-                  updatedDraft.mallId = null;
-                  updatedDraft.placeName = null;
-                  appState.updateParkingDraft(updatedDraft);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            if (draft?.mode == 'structured') ...[
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop && appState.parkingDraft != null) {
+          appState.clearParkingDraft();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Add Parking')),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: ListView(
+            children: [
               DropdownButtonFormField<String>(
-                initialValue: draft?.category,
-                decoration: const InputDecoration(labelText: 'Kategori tempat'),
-                items: const [
-                  DropdownMenuItem(value: 'mall', child: Text('Mall')),
-                  DropdownMenuItem(value: 'event', child: Text('Event')),
-                  DropdownMenuItem(value: 'other', child: Text('Lainnya')),
+                initialValue: draft?.cityId,
+                decoration: const InputDecoration(labelText: 'Kota'),
+                items: [
+                  for (final city in appState.cities)
+                    DropdownMenuItem(value: city.id, child: Text(city.name)),
                 ],
-                onChanged: (category) {
+                onChanged: (cityId) {
                   final updatedDraft = draft ?? ParkingDraft();
-                  if (updatedDraft.category != category) {
-                    updatedDraft.category = category;
+                  if (updatedDraft.cityId != cityId) {
+                    updatedDraft.cityId = cityId;
+                    updatedDraft.mallId = null;
+                    appState.updateParkingDraft(updatedDraft);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: draft?.mode,
+                decoration: const InputDecoration(
+                  labelText: 'Metode pencatatan',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'structured',
+                    child: Text('Terstruktur'),
+                  ),
+                  DropdownMenuItem(value: 'free', child: Text('Bebas')),
+                ],
+                onChanged: (mode) {
+                  final updatedDraft = draft ?? ParkingDraft();
+                  if (updatedDraft.mode != mode) {
+                    updatedDraft.mode = mode;
+                    updatedDraft.category = null;
                     updatedDraft.mallId = null;
                     updatedDraft.placeName = null;
                     appState.updateParkingDraft(updatedDraft);
@@ -99,176 +87,204 @@ class _AddParkingPageState extends State<AddParkingPage> {
                 },
               ),
               const SizedBox(height: 16),
-            ],
-            if (draft?.mode == 'structured' && draft?.category == 'mall') ...[
-              DropdownButtonFormField<String>(
-                key: ValueKey(draft?.cityId),
-                initialValue: draft?.mallId,
-                decoration: const InputDecoration(labelText: 'Mall'),
-                items: [
-                  if (draft?.cityId != null)
-                    for (final mall in appState.getMallsByCity(draft!.cityId!))
-                      DropdownMenuItem(value: mall.id, child: Text(mall.name)),
-                ],
-                onChanged: draft?.cityId == null
-                    ? null
-                    : (mallId) {
-                        final updatedDraft = draft ?? ParkingDraft();
-                        updatedDraft.mallId = mallId;
-                        appState.updateParkingDraft(updatedDraft);
-                      },
-              ),
-              if (draft?.cityId == null)
-                const Text('Pilih kota terlebih dahulu.'),
-              if (draft?.cityId != null &&
-                  appState.getMallsByCity(draft!.cityId!).isEmpty)
-                const Text('Tidak ada mall di kota ini.'),
-              const SizedBox(height: 16),
-            ],
-            if (draft?.mode == 'free' ||
-                (draft?.mode == 'structured' &&
-                    (draft?.category == 'event' ||
-                        draft?.category == 'other'))) ...[
-              TextFormField(
-                key: ValueKey('${draft?.mode}-${draft?.category}'),
-                initialValue: draft?.placeName,
-                decoration: InputDecoration(
-                  labelText: 'Nama tempat',
-                  helperText: draft?.mode == 'free'
-                      ? 'Opsional'
-                      : 'Wajib diisi',
+              if (draft?.mode == 'structured') ...[
+                DropdownButtonFormField<String>(
+                  initialValue: draft?.category,
+                  decoration: const InputDecoration(
+                    labelText: 'Kategori tempat',
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'mall', child: Text('Mall')),
+                    DropdownMenuItem(value: 'event', child: Text('Event')),
+                    DropdownMenuItem(value: 'other', child: Text('Lainnya')),
+                  ],
+                  onChanged: (category) {
+                    final updatedDraft = draft ?? ParkingDraft();
+                    if (updatedDraft.category != category) {
+                      updatedDraft.category = category;
+                      updatedDraft.mallId = null;
+                      updatedDraft.placeName = null;
+                      appState.updateParkingDraft(updatedDraft);
+                    }
+                  },
                 ),
-                onChanged: (placeName) {
+                const SizedBox(height: 16),
+              ],
+              if (draft?.mode == 'structured' && draft?.category == 'mall') ...[
+                DropdownButtonFormField<String>(
+                  key: ValueKey(draft?.cityId),
+                  initialValue: draft?.mallId,
+                  decoration: const InputDecoration(labelText: 'Mall'),
+                  items: [
+                    if (draft?.cityId != null)
+                      for (final mall in appState.getMallsByCity(
+                        draft!.cityId!,
+                      ))
+                        DropdownMenuItem(
+                          value: mall.id,
+                          child: Text(mall.name),
+                        ),
+                  ],
+                  onChanged: draft?.cityId == null
+                      ? null
+                      : (mallId) {
+                          final updatedDraft = draft ?? ParkingDraft();
+                          updatedDraft.mallId = mallId;
+                          appState.updateParkingDraft(updatedDraft);
+                        },
+                ),
+                if (draft?.cityId == null)
+                  const Text('Pilih kota terlebih dahulu.'),
+                if (draft?.cityId != null &&
+                    appState.getMallsByCity(draft!.cityId!).isEmpty)
+                  const Text('Tidak ada mall di kota ini.'),
+                const SizedBox(height: 16),
+              ],
+              if (draft?.mode == 'free' ||
+                  (draft?.mode == 'structured' &&
+                      (draft?.category == 'event' ||
+                          draft?.category == 'other'))) ...[
+                TextFormField(
+                  key: ValueKey('${draft?.mode}-${draft?.category}'),
+                  initialValue: draft?.placeName,
+                  decoration: InputDecoration(
+                    labelText: 'Nama tempat',
+                    helperText: draft?.mode == 'free'
+                        ? 'Opsional'
+                        : 'Wajib diisi',
+                  ),
+                  onChanged: (placeName) {
+                    final updatedDraft = draft ?? ParkingDraft();
+                    updatedDraft.placeName = placeName;
+                    appState.updateParkingDraft(updatedDraft);
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+              DropdownButtonFormField<String>(
+                initialValue: _areaSelection,
+                decoration: const InputDecoration(
+                  labelText: 'Area parkir',
+                  helperText: 'Opsional',
+                ),
+                items: const [
+                  DropdownMenuItem(value: '', child: Text('Tanpa area')),
+                  DropdownMenuItem(value: 'B1', child: Text('B1')),
+                  DropdownMenuItem(value: 'B2', child: Text('B2')),
+                  DropdownMenuItem(value: 'R1', child: Text('R1')),
+                  DropdownMenuItem(value: 'R2', child: Text('R2')),
+                  DropdownMenuItem(value: 'other', child: Text('Lainnya')),
+                ],
+                onChanged: (area) {
+                  setState(() => _areaSelection = area);
                   final updatedDraft = draft ?? ParkingDraft();
-                  updatedDraft.placeName = placeName;
+                  updatedDraft.areaCode = area == 'other' || area == ''
+                      ? null
+                      : area;
                   appState.updateParkingDraft(updatedDraft);
                 },
               ),
-              const SizedBox(height: 16),
-            ],
-            DropdownButtonFormField<String>(
-              initialValue: _areaSelection,
-              decoration: const InputDecoration(
-                labelText: 'Area parkir',
-                helperText: 'Opsional',
-              ),
-              items: const [
-                DropdownMenuItem(value: '', child: Text('Tanpa area')),
-                DropdownMenuItem(value: 'B1', child: Text('B1')),
-                DropdownMenuItem(value: 'B2', child: Text('B2')),
-                DropdownMenuItem(value: 'R1', child: Text('R1')),
-                DropdownMenuItem(value: 'R2', child: Text('R2')),
-                DropdownMenuItem(value: 'other', child: Text('Lainnya')),
+              if (_areaSelection == 'other') ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  initialValue: draft?.areaCode,
+                  decoration: const InputDecoration(labelText: 'Kode area'),
+                  onChanged: (areaCode) {
+                    final updatedDraft = draft ?? ParkingDraft();
+                    updatedDraft.areaCode = areaCode;
+                    appState.updateParkingDraft(updatedDraft);
+                  },
+                ),
               ],
-              onChanged: (area) {
-                setState(() => _areaSelection = area);
-                final updatedDraft = draft ?? ParkingDraft();
-                updatedDraft.areaCode = area == 'other' || area == ''
-                    ? null
-                    : area;
-                appState.updateParkingDraft(updatedDraft);
-              },
-            ),
-            if (_areaSelection == 'other') ...[
               const SizedBox(height: 16),
               TextFormField(
-                initialValue: draft?.areaCode,
-                decoration: const InputDecoration(labelText: 'Kode area'),
-                onChanged: (areaCode) {
+                initialValue: draft?.notes,
+                decoration: const InputDecoration(
+                  labelText: 'Catatan (opsional)',
+                  hintText: 'Contoh: dekat pintu masuk',
+                ),
+                maxLines: 3,
+                onChanged: (notes) {
                   final updatedDraft = draft ?? ParkingDraft();
-                  updatedDraft.areaCode = areaCode;
+                  updatedDraft.notes = notes;
                   appState.updateParkingDraft(updatedDraft);
                 },
               ),
-            ],
-            const SizedBox(height: 16),
-            TextFormField(
-              initialValue: draft?.notes,
-              decoration: const InputDecoration(
-                labelText: 'Catatan (opsional)',
-                hintText: 'Contoh: dekat pintu masuk',
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _reminderText,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Pengingat (menit, opsional)',
+                  hintText: 'Contoh: 60',
+                ),
+                onChanged: (value) {
+                  _reminderText = value;
+                  final updatedDraft = draft ?? ParkingDraft();
+                  updatedDraft.reminderMinutes = int.tryParse(value.trim());
+                  appState.updateParkingDraft(updatedDraft);
+                },
               ),
-              maxLines: 3,
-              onChanged: (notes) {
-                final updatedDraft = draft ?? ParkingDraft();
-                updatedDraft.notes = notes;
-                appState.updateParkingDraft(updatedDraft);
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              initialValue: _reminderText,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Pengingat (menit, opsional)',
-                hintText: 'Contoh: 60',
-              ),
-              onChanged: (value) {
-                _reminderText = value;
-                final updatedDraft = draft ?? ParkingDraft();
-                updatedDraft.reminderMinutes = int.tryParse(value.trim());
-                appState.updateParkingDraft(updatedDraft);
-              },
-            ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () {
-                final currentDraft = appState.parkingDraft;
-                if (currentDraft?.cityId == null ||
-                    currentDraft?.mode == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Pilih kota dan metode pencatatan.'),
-                    ),
-                  );
-                  return;
-                }
-                if (currentDraft?.mode == 'structured') {
-                  if (currentDraft?.category == null) {
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  final currentDraft = appState.parkingDraft;
+                  if (currentDraft?.cityId == null ||
+                      currentDraft?.mode == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Pilih kategori tempat.')),
-                    );
-                    return;
-                  }
-                  if (currentDraft?.category == 'mall' &&
-                      currentDraft?.mallId == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Pilih mall.')),
-                    );
-                    return;
-                  }
-                  if (currentDraft?.category != 'mall' &&
-                      (currentDraft?.placeName?.trim().isEmpty ?? true)) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Isi nama tempat.')),
-                    );
-                    return;
-                  }
-                }
-                if (_areaSelection == 'other' &&
-                    (currentDraft?.areaCode?.trim().isEmpty ?? true)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Isi kode area parkir.')),
-                  );
-                  return;
-                }
-                if (_reminderText.trim().isNotEmpty &&
-                    (currentDraft?.reminderMinutes == null ||
-                        currentDraft!.reminderMinutes! <= 0)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Isi durasi pengingat dengan menit positif.',
+                      const SnackBar(
+                        content: Text('Pilih kota dan metode pencatatan.'),
                       ),
-                    ),
-                  );
-                  return;
-                }
-                Navigator.pushNamed(context, AppRoutes.capturePhoto);
-              },
-              child: const Text('Capture Photo'),
-            ),
-          ],
+                    );
+                    return;
+                  }
+                  if (currentDraft?.mode == 'structured') {
+                    if (currentDraft?.category == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Pilih kategori tempat.')),
+                      );
+                      return;
+                    }
+                    if (currentDraft?.category == 'mall' &&
+                        currentDraft?.mallId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Pilih mall.')),
+                      );
+                      return;
+                    }
+                    if (currentDraft?.category != 'mall' &&
+                        (currentDraft?.placeName?.trim().isEmpty ?? true)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Isi nama tempat.')),
+                      );
+                      return;
+                    }
+                  }
+                  if (_areaSelection == 'other' &&
+                      (currentDraft?.areaCode?.trim().isEmpty ?? true)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Isi kode area parkir.')),
+                    );
+                    return;
+                  }
+                  if (_reminderText.trim().isNotEmpty &&
+                      (currentDraft?.reminderMinutes == null ||
+                          currentDraft!.reminderMinutes! <= 0)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Isi durasi pengingat dengan menit positif.',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  Navigator.pushNamed(context, AppRoutes.capturePhoto);
+                },
+                child: const Text('Capture Photo'),
+              ),
+            ],
+          ),
         ),
       ),
     );
