@@ -444,4 +444,84 @@ void main() {
     );
     expect(find.text('45'), findsOneWidget);
   });
+
+  testWidgets('returning from photo keeps draft; leaving form clears it', (
+    tester,
+  ) async {
+    await useTallScreen(tester);
+    final state = AppState();
+    addTearDown(state.dispose);
+    expect(state.login('demo@spark.local', 'spark123'), isTrue);
+    final sessionCount = state.activeSessions.length;
+    state.updateParkingDraft(
+      ParkingDraft(cityId: 'city-bandung', mode: 'free', notes: 'Dekat pilar'),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/add'),
+                child: const Text('Buka form'),
+              ),
+            ),
+          ),
+          routes: {
+            '/add': (_) => const AddParkingPage(),
+            AppRoutes.capturePhoto: (_) =>
+                const Scaffold(body: Text('Halaman foto')),
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Buka form'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Capture Photo'));
+    await tester.tap(find.text('Capture Photo'));
+    await tester.pumpAndSettle();
+    expect(state.parkingDraft?.notes, 'Dekat pilar');
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
+    expect(state.parkingDraft?.notes, 'Dekat pilar');
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(state.parkingDraft, isNull);
+    expect(state.activeSessions.length, sessionCount);
+  });
+
+  testWidgets('system back from form clears draft', (tester) async {
+    await useTallScreen(tester);
+    final state = AppState();
+    addTearDown(state.dispose);
+    state.updateParkingDraft(
+      ParkingDraft(cityId: 'city-bandung', mode: 'free'),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: state,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/add'),
+                child: const Text('Buka form'),
+              ),
+            ),
+          ),
+          routes: {'/add': (_) => const AddParkingPage()},
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Buka form'));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(state.parkingDraft, isNull);
+    expect(find.text('Buka form'), findsOneWidget);
+  });
 }
