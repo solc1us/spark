@@ -161,9 +161,22 @@ class ParkingHistoryPage extends StatelessWidget {
   }
 
   Widget _buildHistoryCard(BuildContext context, ParkingSession session) {
+    final appState = context.read<AppState>();
+    String? mallName;
+    if (session.mallId != null) {
+      try {
+        mallName = appState
+            .getMallsByCity(session.cityId)
+            .firstWhere((mall) => mall.id == session.mallId)
+            .name;
+      } catch (_) {}
+    }
+
     String namaTempat = 'Lokasi Parkir';
     if (session.placeName != null && session.placeName!.trim().isNotEmpty) {
       namaTempat = session.placeName!;
+    } else if (mallName != null && mallName.trim().isNotEmpty) {
+      namaTempat = mallName;
     }
 
     String kodeArea = 'Tanpa Area';
